@@ -3,6 +3,7 @@
 ## 📊 Comparison
 
 ### BEFORE (v2.0 - CLI)
+
 - ❌ Command-line interface only
 - ❌ Text-based prompts
 - ❌ PowerShell dialog windows
@@ -11,6 +12,7 @@
 - ❌ Basic error messages
 
 ### AFTER (v3.0 - GUI) ✨
+
 - ✅ Beautiful desktop application
 - ✅ Modern dark theme UI
 - ✅ Integrated all-in-one interface
@@ -24,7 +26,8 @@
 ## 🎯 User Experience Improvements
 
 ### OLD WAY (CLI v2.0)
-```
+
+```md
 1. Run: npm start
 2. Answer terminal prompts
 3. Enter URL in console
@@ -36,7 +39,8 @@
 ```
 
 ### NEW WAY (GUI v3.0)
-```
+
+```md
 1. Run: npm start
 2. Beautiful window opens automatically
 3. Paste URL in elegant input field
@@ -50,17 +54,20 @@
 ## 📸 Visual Elements Added
 
 ### Header Section
+
 - App logo with icon
 - Clean title
 - Version badge
 
 ### Video Info Display
+
 - Thumbnail preview (200x112px card)
 - Video title display
 - Duration information
 - Clean card layout
 
 ### Download Settings
+
 - Folder selection with browse button
 - Editable filename field
 - Format dropdown (MP4, MKV, WebM, AVI)
@@ -68,12 +75,14 @@
 - Large "Start Download" button
 
 ### Progress Section
+
 - Animated progress bar (gradient fill)
 - Percentage display (0-100%)
 - Progress message updates
 - Shimmer effect during download
 
 ### Complete Section
+
 - Success checkmark (✅)
 - File path display
 - File size information
@@ -81,18 +90,21 @@
 - "Download Another" button
 
 ### Status Banner
+
 - Auto-showing notifications
 - Color-coded (success, error, warning, info)
 - Dismissible with X button
 - Auto-hide for success messages
 
 ### Footer
+
 - yt-dlp version display
 - Branding information
 
 ## 🎨 Design System
 
 ### Colors
+
 ```css
 Primary Blue:    #0078d4
 Success Green:   #28a745
@@ -109,14 +121,16 @@ Border Color:    #3e3e42
 ```
 
 ### Typography
-```
+
+```md
 Font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto
 Sizes: 12px - 24px
 Weights: 400, 500, 600
 ```
 
 ### Spacing
-```
+
+```md
 Cards: 25px padding
 Gaps: 10px, 15px, 20px
 Border Radius: 6px, 8px, 12px, 15px
@@ -125,6 +139,7 @@ Border Radius: 6px, 8px, 12px, 15px
 ## ⚡ Technical Improvements
 
 ### Architecture
+
 | Aspect | Before | After |
 |--------|--------|-------|
 | Interface | CLI + PowerShell | Electron Desktop App |
@@ -134,12 +149,15 @@ Border Radius: 6px, 8px, 12px, 15px
 | Platform | Windows (PowerShell) | Cross-platform capable |
 
 ### Code Organization
+
 **Before:**
+
 - Single `index.js` file (360 lines)
 - Mixed UI and logic
 - PowerShell script strings
 
 **After:**
+
 - `main.js` - Backend (195 lines)
 - `renderer.js` - Frontend (197 lines)
 - `index.html` - Structure (180 lines)
@@ -147,6 +165,7 @@ Border Radius: 6px, 8px, 12px, 15px
 - Separation of concerns
 
 ### New Features
+
 1. **Video Information Preview** - NEW
 2. **Thumbnail Display** - NEW
 3. **Real-time Progress Bar** - NEW (animated)
@@ -159,7 +178,8 @@ Border Radius: 6px, 8px, 12px, 15px
 ## 📈 Metrics
 
 ### Code Stats
-```
+
+```md
 Total Files:     7 main files (was 1)
 Total Lines:     ~1,200 lines (was 360)
 UI Elements:     15+ interactive components
@@ -168,13 +188,15 @@ States:          5 app states (URL, Info, Settings, Progress, Complete)
 ```
 
 ### User Actions Reduced
-```
+
+```md
 CLI v2.0: ~15 actions (prompts, dialogs, buttons)
 GUI v3.0: ~5 actions (paste, fetch, configure, download, done)
 ```
 
 ### Visual Feedback
-```
+
+```md
 CLI v2.0: 2 feedback points (text + dialog)
 GUI v3.0: 7 feedback points (banner, progress, cards, animations, icons, colors, messages)
 ```
@@ -182,18 +204,21 @@ GUI v3.0: 7 feedback points (banner, progress, cards, animations, icons, colors,
 ## 🎯 Key Achievements
 
 ### User Experience ✨
+
 - **80% Fewer Steps** to complete a download
 - **100% Visual** - No more switching between windows
 - **Real-time Feedback** at every step
 - **Professional Look** comparable to commercial apps
 
 ### Developer Experience 🛠️
+
 - **Clean Code** - Separated concerns
 - **Maintainable** - Easy to add features
 - **Documented** - README + QUICK-START + GUI-FEATURES
 - **Buildable** - Can create .exe installer
 
 ### Feature Completeness 🎉
+
 - **Video Preview** - See before downloading
 - **Quality Options** - Choose your preference
 - **Progress Tracking** - Know exactly how long
@@ -203,18 +228,21 @@ GUI v3.0: 7 feedback points (banner, progress, cards, animations, icons, colors,
 ## 🚀 What This Means
 
 ### For Users
+
 - Much easier to use
 - More professional experience
 - Better visual feedback
 - Faster workflow
 
 ### For Development
+
 - Ready for distribution
 - Easy to extend
 - Professional codebase
 - Modern tech stack
 
 ### For Future
+
 - Can add more features easily
 - Can customize appearance
 - Can build installers

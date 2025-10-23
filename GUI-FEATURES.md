@@ -7,28 +7,33 @@ I've successfully transformed your command-line video downloader into a **beauti
 ## 📦 New Files Created
 
 ### Core Application Files
+
 1. **main.js** - Electron main process (handles system operations)
 2. **index.html** - Modern, beautiful UI layout
 3. **styles.css** - Dark theme styling with smooth animations
 4. **renderer.js** - Frontend JavaScript for user interactions
 
 ### Supporting Files
-5. **assets/icon.png** - Application icon
-6. **QUICK-START.md** - User-friendly quick start guide
-7. **README.md** - Updated comprehensive documentation
+
+   1. **assets/icon.png** - Application icon
+   2. **QUICK-START.md** - User-friendly quick start guide
+   3. **README.md** - Updated comprehensive documentation
 
 ### Updated Files
+
 - **package.json** - Added Electron, build scripts, and configuration
 
 ## ✨ Key Features
 
 ### Beautiful Modern Interface
+
 - 🎨 **Dark Theme** - Easy on the eyes, professional look
 - 🎯 **Intuitive Layout** - Step-by-step workflow
 - ✨ **Smooth Animations** - Professional transitions and effects
 - 📱 **Responsive Design** - Works on different screen sizes
 
 ### Powerful Functionality
+
 - 🖼️ **Video Preview** - See thumbnail and info before downloading
 - 📊 **Real-time Progress** - Visual progress bar with percentage
 - 🎬 **Quality Selection** - Best, 1080p, 720p, 480p, Audio Only
@@ -37,6 +42,7 @@ I've successfully transformed your command-line video downloader into a **beauti
 - ⚡ **Quick Actions** - Open folder, download another video
 
 ### User Experience
+
 - ✅ **Auto-detection** - Automatically fetches video info
 - 🔄 **Auto-installation** - Offers to install yt-dlp if missing
 - 🚨 **Smart Errors** - Clear, helpful error messages
@@ -65,7 +71,7 @@ npm run cli
 
 ## 🏗️ Architecture
 
-```
+```md
 ┌─────────────────────────────────────────┐
 │         Electron Application            │
 ├─────────────────────────────────────────┤
@@ -88,6 +94,7 @@ npm run cli
 ## 🎨 Design Highlights
 
 ### Color Scheme
+
 - Primary: #0078d4 (Windows Blue)
 - Background: #1e1e1e (Dark Gray)
 - Cards: #2d2d30 (Slightly Lighter Gray)
@@ -95,6 +102,7 @@ npm run cli
 - Success: #28a745 (Green)
 
 ### UI Components
+
 - Modern card-based layout
 - Professional button styles with hover effects
 - Smooth progress animations
@@ -136,6 +144,7 @@ The installer will be created in the `dist` folder.
 ## 🌐 Supported Websites
 
 1000+ websites including:
+
 - YouTube
 - Facebook
 - Instagram
@@ -172,12 +181,12 @@ The installer will be created in the `dist` folder.
 ✅ **Maintainable Code** - Clean, organized, commented
 ✅ **Extensible** - Easy to add new features
 
-## 🚀 Ready to Use!
+## 🚀 Ready to Use
 
-Your video downloader is now a **beautiful, professional Windows desktop application**! 
+Your video downloader is now a **beautiful, professional Windows desktop application**!
 
 Just run `npm start` and enjoy the new GUI experience!
 
 ---
 
-**Built with ❤️ using Electron + yt-dlp**
+### **Built with ❤️ using Electron + yt-dlp**
