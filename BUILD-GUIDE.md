@@ -205,4 +205,4 @@ You now have a **professional, distributable Windows application**!
 
 ---
 
-**Your video downloader is now a real Windows application! 🚀**
+### Your video downloader is now a real Windows application!🚀

@@ -1,4 +1,4 @@
-name: Build and Release (Windows)
+name: Build and Release
 
 on:
   push:
@@ -7,7 +7,12 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - name: Checkout
@@ -22,15 +27,50 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Windows installer
-        run: npm run build
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npx electron-builder --win
+
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: npx electron-builder --mac
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npx electron-builder --linux
+
+      - name: Prepare release notes from CHANGELOG
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          FILE=CHANGELOG.md
+          OUT=release-notes.md
+          if [ -f "$FILE" ]; then
+            # Extract section starting at '## [TAG]' or '## TAG' up to next '## '
+            awk -v tag="$TAG" '/^## /{p=0} $0 ~ "^## \\[[vV]" tag "\\]" || $0 ~ "^## " tag {p=1} p{print}' "$FILE" | sed -n '1,/^## /p' | sed '$d' > "$OUT" || true
+            # Fallback: try without trimming
+            if [ ! -s "$OUT" ]; then
+              awk -v tag="$TAG" '$0 ~ "^## \\[[vV]" tag "\\]" || $0 ~ "^## " tag, /^## /{print}' "$FILE" | sed '$d' > "$OUT" || true
+            fi
+            # If still empty, use entire file
+            if [ ! -s "$OUT" ]; then cp "$FILE" "$OUT"; fi
+          else
+            echo "Release $TAG" > "$OUT"
+          fi
+          echo "RELEASE_NOTES=$OUT" >> $GITHUB_ENV
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
+          name: Video Downloader ${{ github.ref_name }}
+          body_path: release-notes.md
           files: |
             dist/*.exe
             dist/*.blockmap
-          generate_release_notes: true
+            dist/*.dmg
+            dist/*.zip
+            dist/*.AppImage
+            dist/*.deb
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

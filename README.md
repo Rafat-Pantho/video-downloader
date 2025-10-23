@@ -7,7 +7,7 @@
 
 ## ⬇️ Download
 
-- Latest Windows installer: https://github.com/Rafat-Pantho/video-downloader/releases/latest
+- Latest Windows installer: [Download](https://github.com/Rafat-Pantho/video-downloader/releases/latest)
 - Latest release downloads: ![Latest Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/latest/total)
 
 
