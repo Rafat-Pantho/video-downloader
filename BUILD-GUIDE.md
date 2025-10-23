@@ -1,4 +1,4 @@
-# 🎉 Your App is Built!
+# 🎉 Your App is Built
 
 ## ✅ What Was Created
 
@@ -26,6 +26,7 @@ Your Video Downloader is now a **standalone Windows application**!
 ### Option 2: Use Portable Version
 
 The `dist\win-unpacked` folder contains a portable version:
+
 - Navigate to `dist\win-unpacked`
 - Double-click `Video Downloader.exe`
 - No installation required!
@@ -35,12 +36,14 @@ The `dist\win-unpacked` folder contains a portable version:
 You can now share your app in two ways:
 
 ### Share the Installer
+
 - Single file: `Video Downloader Setup 3.0.0.exe` (~180 MB)
 - Users run it to install the app
 - Creates Start Menu entry and Desktop shortcut
 - Can be uninstalled via Windows Settings
 
 ### Share the Portable Version
+
 - Zip the entire `dist\win-unpacked` folder
 - Users extract and run `Video Downloader.exe`
 - No installation needed
@@ -48,13 +51,15 @@ You can now share your app in two ways:
 
 ## 🎯 What Users Need
 
-### ✅ Your App Includes:
+### ✅ Your App Includes
+
 - Complete Electron runtime
 - All Node.js dependencies
 - Your application code
 - UI and assets
 
-### ⚠️ Users Must Install Separately:
+### ⚠️ Users Must Install Separately
+
 - **Python 3** (for yt-dlp)
 - **yt-dlp** (the app will offer to install it)
 
@@ -75,7 +80,7 @@ npm start
 
 ## 📦 What's in the dist Folder
 
-```
+```md
 dist/
 ├── Video Downloader Setup 3.0.0.exe    ← Installer (share this!)
 ├── Video Downloader Setup 3.0.0.exe.blockmap
@@ -99,6 +104,7 @@ dist/
 ### Change App Name
 
 Edit `package.json`:
+
 ```json
 {
   "name": "my-custom-name",
@@ -109,6 +115,7 @@ Edit `package.json`:
 ### Change Version
 
 Edit `package.json`:
+
 ```json
 {
   "version": "3.1.0"
@@ -145,6 +152,7 @@ Your installer includes:
 ### Optional: Code Signing
 
 For professional distribution, consider:
+
 - Getting a code signing certificate
 - Signing your .exe to avoid Windows SmartScreen warnings
 - Costs ~$100-400/year from certificate authorities
@@ -152,6 +160,7 @@ For professional distribution, consider:
 ## 🐛 Troubleshooting
 
 ### Build Failed
+
 ```bash
 # Clean and rebuild
 rm -rf dist node_modules
@@ -160,32 +169,37 @@ npm run build
 ```
 
 ### Icon Not Showing
+
 - Use .ico format (256x256 minimum)
 - Place in `assets/icon.ico`
 - Rebuild the app
 
 ### App Too Large
+
 - Normal! Electron apps bundle Chromium (~180 MB)
 - Can't be reduced significantly
 - Consider compression for distribution
 
 ### App Won't Start
+
 - Check Windows Defender/Antivirus
 - Run as Administrator
 - Check if Python is installed
 
-## 🎉 Congratulations!
+## 🎉 Congratulations
 
 You now have a **professional, distributable Windows application**!
 
-### What You Achieved:
+### What You Achieved
+
 ✅ Modern desktop application
 ✅ Standalone installer
 ✅ Professional user experience
 ✅ Ready for distribution
 ✅ No command-line needed
 
-### Ready to Use:
+### Ready to Use
+
 📍 **Installer**: `dist\Video Downloader Setup 3.0.0.exe`
 📍 **Portable**: `dist\win-unpacked\Video Downloader.exe`
 

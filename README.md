@@ -89,8 +89,8 @@ git branch -M main
 git add .
 git commit -m "chore: initial GUI app v3.0"
 
-# Replace USERNAME with your GitHub username
-$repo = "https://github.com/USERNAME/video-downloader.git"
+# Set your GitHub repo URL
+$repo = "https://github.com/Rafat-Pantho/video-downloader.git"
 git remote add origin $repo
 
 # Push to GitHub

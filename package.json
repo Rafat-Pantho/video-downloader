@@ -42,12 +42,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/video-downloader.git"
+    "url": "https://github.com/Rafat-Pantho/video-downloader.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/video-downloader/issues"
+    "url": "https://github.com/Rafat-Pantho/video-downloader/issues"
   },
-  "homepage": "https://github.com/USERNAME/video-downloader#readme",
+  "homepage": "https://github.com/Rafat-Pantho/video-downloader#readme",
   "dependencies": {
     "chalk": "^5.3.0",
     "inquirer": "^9.2.12",
