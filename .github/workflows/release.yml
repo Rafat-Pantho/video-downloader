@@ -57,10 +57,19 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: npx electron-builder --linux --publish=never
 
-      - name: List build outputs
+      - name: List build outputs (Unix)
+        if: matrix.os != 'windows-latest'
+        shell: bash
         run: |
-          echo "OS ${{ matrix.os }} contents of dist:" 
-          ls -la dist || dir dist || true
+          echo "OS ${{ matrix.os }} contents of dist:"
+          ls -la dist || true
+
+      - name: List build outputs (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Write-Host "OS windows-latest contents of dist:"
+          if (Test-Path dist) { Get-ChildItem -Recurse dist | Format-Table FullName,Length -Auto }
 
       - name: Prepare release notes from CHANGELOG
         shell: bash
