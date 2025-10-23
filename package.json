@@ -14,6 +14,7 @@
   "build": {
     "appId": "com.videodownloader.app",
     "productName": "Video Downloader",
+    "icon": "assets/Gemini_Generated_Image_jjisp6jjisp6jjis.png",
     "artifactName": "video-downloader-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
@@ -21,7 +22,8 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "assets/Gemini_Generated_Image_jjisp6jjisp6jjis.png"
     },
     "mac": {
       "target": [
