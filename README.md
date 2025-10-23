@@ -10,17 +10,18 @@
 - Latest Windows installer: [Download](https://github.com/Rafat-Pantho/video-downloader/releases/latest)
 - Latest release downloads: ![Latest Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/latest/total)
 
-### Get it for your OS
+### Direct links (latest)
 
-- Windows (recommended): open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download the file named:
-  - “Video Downloader Setup x.y.z.exe” (installer)
-  - Optionally: “.blockmap” is for auto-updaters only (you can ignore it)
-- macOS: open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download:
-  - “.dmg” (drag-and-drop installer) or “.zip” (portable app)
-  - Note: Builds may be unsigned; you may need to right-click → Open on first launch
-- Linux: open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download:
-  - “.AppImage” (portable) or “.deb” (Debian/Ubuntu)
-  - Make the AppImage executable: chmod +x Video-Downloader-*.AppImage
+- Windows (x64): [video-downloader-win-x64.exe](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-win-x64.exe)
+- macOS (arm64): [video-downloader-mac-arm64.dmg](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-mac-arm64.dmg)
+  - Optional portable: [video-downloader-mac-arm64.zip](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-mac-arm64.zip)
+- Linux (x64 AppImage): [video-downloader-linux-x64.AppImage](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-linux-x64.AppImage)
+  - Debian/Ubuntu: [video-downloader-linux-x64.deb](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-linux-x64.deb)
+
+Notes:
+
+- macOS builds may be unsigned; right-click the app and choose Open on first launch.
+- For AppImage on Linux, run: chmod +x video-downloader-linux-x64.AppImage
 
 A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
