@@ -10,6 +10,17 @@
 - Latest Windows installer: [Download](https://github.com/Rafat-Pantho/video-downloader/releases/latest)
 - Latest release downloads: ![Latest Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/latest/total)
 
+### Get it for your OS
+
+- Windows (recommended): open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download the file named:
+  - “Video Downloader Setup x.y.z.exe” (installer)
+  - Optionally: “.blockmap” is for auto-updaters only (you can ignore it)
+- macOS: open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download:
+  - “.dmg” (drag-and-drop installer) or “.zip” (portable app)
+  - Note: Builds may be unsigned; you may need to right-click → Open on first launch
+- Linux: open the [Latest Release](https://github.com/Rafat-Pantho/video-downloader/releases/latest) and download:
+  - “.AppImage” (portable) or “.deb” (Debian/Ubuntu)
+  - Make the AppImage executable: chmod +x Video-Downloader-*.AppImage
 
 A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
@@ -256,16 +267,6 @@ ISC License
 ## 🙏 Credits
 
 Powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) - The best video downloader
-````
-
-- Update yt-dlp: `python -m pip install -U yt-dlp`
-- Check if video is public
-- Try a different video
-
-### Dialog doesn't appear
-
-- Make sure you're on Windows
-- Run PowerShell as administrator
 
 ## 📝 Notes
 
