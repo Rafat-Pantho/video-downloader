@@ -1,5 +1,10 @@
 # Video Downloader v3.0 - GUI Edition
 
+![Build](https://github.com/Rafat-Pantho/video-downloader/actions/workflows/release.yml/badge.svg)
+![Release](https://img.shields.io/github/v/release/Rafat-Pantho/video-downloader)
+![Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/total)
+![License](https://img.shields.io/github/license/Rafat-Pantho/video-downloader)
+
 A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
 ## ✨ Features
@@ -69,6 +74,20 @@ npm run build
 ```
 
 The installer will be created in the `dist` folder.
+
+## 🤖 Automated Releases (GitHub Actions)
+
+Tagging a version will automatically build the Windows installer and attach it to a GitHub Release.
+
+```powershell
+# Create and push a version tag
+git tag v3.0.1
+git push origin v3.0.1
+```
+
+The workflow lives at `.github/workflows/release.yml` and uploads:
+- `dist/*.exe`
+- `dist/*.blockmap`
 
 ## 📤 Publish to GitHub
 
