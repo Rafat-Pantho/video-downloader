@@ -29,16 +29,19 @@ A modern, beautiful desktop application for downloading videos from YouTube, Fac
 ### First Time Setup
 
 1. **Install Dependencies**
+
 ```bash
 npm install
 ```
 
-2. **Install Python & yt-dlp** (if not already installed)
+1. **Install Python & yt-dlp** (if not already installed)
+
 ```bash
 pip install yt-dlp
 ```
 
-3. **Run the Application**
+1. **Run the Application**
+
 ```bash
 npm start
 ```
@@ -92,6 +95,7 @@ git push origin v3.0.1
 ```
 
 The workflow lives at `.github/workflows/release.yml` and uploads:
+
 - `dist/*.exe`
 - `dist/*.blockmap`
 
@@ -138,13 +142,15 @@ After running `npm run build`, upload the generated installer from `dist/Video D
 ## 🎨 Features Overview
 
 ### Video Information Preview
+
 - Automatic title detection
 - Video duration display
 - Thumbnail preview
 
 ### Download Options
+
 - **Format**: MP4 (Recommended), MKV, WebM, AVI
-- **Quality**: 
+- **Quality**:
   - Best Available (highest quality)
   - 1080p Full HD
   - 720p HD
@@ -152,6 +158,7 @@ After running `npm run build`, upload the generated installer from `dist/Video D
   - Audio Only (extract audio)
 
 ### User Interface
+
 - Dark theme optimized for eyes
 - Smooth animations and transitions
 - Real-time progress tracking
@@ -161,7 +168,9 @@ After running `npm run build`, upload the generated installer from `dist/Video D
 ## 🆘 Troubleshooting
 
 ### yt-dlp not found
+
 The app will offer to install yt-dlp automatically. If that fails:
+
 ```bash
 python -m pip install yt-dlp
 # or
@@ -169,15 +178,18 @@ pip install yt-dlp
 ```
 
 ### Python not found
+
 Download and install Python from [python.org](https://www.python.org/downloads/)
 
 ### Download fails
+
 - Check your internet connection
 - Verify the video URL is correct and accessible
 - Some videos may be region-restricted or private
 - Try updating yt-dlp: `pip install -U yt-dlp`
 
 ### App won't start
+
 ```bash
 # Reinstall dependencies
 npm install
@@ -188,13 +200,15 @@ npm run dev
 ## 🔧 Technical Details
 
 ### Architecture
+
 - **Electron**: Cross-platform desktop framework
 - **Main Process** (`main.js`): Handles system operations, file system, and yt-dlp
 - **Renderer Process** (`renderer.js`): UI logic and user interactions
 - **IPC Communication**: Secure messaging between processes
 
 ### File Structure
-```
+
+```text
 video-downloader/
 ├── assets/          # Application icons and images
 ├── index.html       # Main UI structure
@@ -205,6 +219,18 @@ video-downloader/
 ├── package.json     # Dependencies and scripts
 └── README.md        # This file
 ```
+
+## 🔐 Code Signing (optional)
+
+You can enable signed installers (recommended for users):
+
+- Windows: create a code-signing certificate (PFX) and set GitHub secrets:
+  - WIN_CSC_LINK (base64 or HTTPS link to PFX)
+  - WIN_CSC_KEY_PASSWORD (certificate password)
+- macOS: provide Apple ID credentials and team information (for signing/notarization):
+  - APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+
+The build workflow will automatically upload unsigned artifacts; once secrets are configured, electron-builder will sign when possible.
 
 ## 📝 Supported Websites
 
