@@ -29,15 +29,15 @@ jobs:
 
       - name: Build (Windows)
         if: matrix.os == 'windows-latest'
-        run: npx electron-builder --win
+        run: npx electron-builder --win --publish=never
 
       - name: Build (macOS)
         if: matrix.os == 'macos-latest'
-        run: npx electron-builder --mac
+        run: npx electron-builder --mac --publish=never
 
       - name: Build (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: npx electron-builder --linux
+        run: npx electron-builder --linux --publish=never
 
       - name: Prepare release notes from CHANGELOG
         shell: bash
