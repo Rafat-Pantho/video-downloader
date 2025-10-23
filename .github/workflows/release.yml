@@ -42,6 +42,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: npx electron-builder --linux --publish=never
 
+      - name: List build outputs
+        run: |
+          echo "OS ${{ matrix.os }} contents of dist:" 
+          ls -la dist || dir dist || true
+
       - name: Prepare release notes from CHANGELOG
         shell: bash
         run: |
@@ -87,6 +92,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
       - name: Create/Update GitHub Release
         uses: softprops/action-gh-release@v2
