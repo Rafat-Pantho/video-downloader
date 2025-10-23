@@ -5,6 +5,12 @@
 ![Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/total)
 ![License](https://img.shields.io/github/license/Rafat-Pantho/video-downloader)
 
+## ⬇️ Download
+
+- Latest Windows installer: https://github.com/Rafat-Pantho/video-downloader/releases/latest
+- Latest release downloads: ![Latest Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/latest/total)
+
+
 A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
 ## ✨ Features
