@@ -1,0 +1,236 @@
+# Video Downloader v3.0 - GUI Edition
+
+A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
+
+## ✨ Features
+
+- 🎨 **Modern GUI** - Beautiful, dark-themed Windows native interface
+- 🚀 **Easy to Use** - Simple, intuitive workflow
+- 📥 **Multi-Platform** - YouTube, Facebook, Instagram, TikTok, Twitter, and 1000+ sites
+- 🎬 **Quality Options** - Choose from Best, 1080p, 720p, 480p, or Audio Only
+- 📊 **Real-time Progress** - Live download progress with percentage
+- 💾 **Multiple Formats** - MP4, MKV, WebM, AVI
+- ⚡ **Powered by yt-dlp** - Most reliable video downloader available
+- 🖥️ **Windows Optimized** - Native Windows desktop experience
+
+## 🚀 Quick Start
+
+### First Time Setup
+
+1. **Install Dependencies**
+```bash
+npm install
+```
+
+2. **Install Python & yt-dlp** (if not already installed)
+```bash
+pip install yt-dlp
+```
+
+3. **Run the Application**
+```bash
+npm start
+```
+
+The app will check for yt-dlp on startup and offer to install it if needed.
+
+## 📋 Requirements
+
+- Node.js 18+
+- Python 3.6+
+- Windows 10/11 (for GUI)
+
+## 🎯 How to Use
+
+1. **Enter Video URL** - Paste any video URL into the input field
+2. **Fetch Info** - Click "Fetch Info" to retrieve video details
+3. **Configure Settings**:
+   - Choose download folder (default: Downloads)
+   - Edit filename if desired
+   - Select video format (MP4, MKV, WebM, AVI)
+   - Choose quality (Best, 1080p, 720p, 480p, Audio Only)
+4. **Download** - Click "Start Download" and watch the progress
+5. **Complete** - Open folder or download another video
+
+## 🛠️ Available Scripts
+
+- `npm start` - Launch the GUI application
+- `npm run dev` - Run in development mode
+- `npm run cli` - Use the old CLI interface
+- `npm run build` - Build Windows installer (.exe)
+- `npm run build:dir` - Build unpacked app folder
+
+## 📦 Building Installer
+
+To create a Windows installer:
+
+```bash
+npm run build
+```
+
+The installer will be created in the `dist` folder.
+
+## 📤 Publish to GitHub
+
+Follow these steps to publish this project to a new GitHub repository.
+
+1. Create a new empty repository on GitHub (do not add a README, .gitignore, or license).
+2. Initialize git locally and push your code:
+
+```powershell
+# From the project root
+# Initialize and make the first commit
+git init
+git branch -M main
+
+# Ensure build artifacts are ignored (dist/, installers, etc.)
+# The provided .gitignore already covers Electron outputs
+
+git add .
+git commit -m "chore: initial GUI app v3.0"
+
+# Replace USERNAME with your GitHub username
+$repo = "https://github.com/USERNAME/video-downloader.git"
+git remote add origin $repo
+
+# Push to GitHub
+git push -u origin main
+```
+
+If you already created a repo with a different name, update the remote URL accordingly.
+
+### Optional: Tag a release
+
+```powershell
+git tag v3.0.0
+git push origin v3.0.0
+```
+
+### Optional: GitHub Releases (upload installer)
+
+After running `npm run build`, upload the generated installer from `dist/Video Downloader Setup 3.0.0.exe` to a new GitHub Release on the repo.
+
+## 🎨 Features Overview
+
+### Video Information Preview
+- Automatic title detection
+- Video duration display
+- Thumbnail preview
+
+### Download Options
+- **Format**: MP4 (Recommended), MKV, WebM, AVI
+- **Quality**: 
+  - Best Available (highest quality)
+  - 1080p Full HD
+  - 720p HD
+  - 480p SD
+  - Audio Only (extract audio)
+
+### User Interface
+- Dark theme optimized for eyes
+- Smooth animations and transitions
+- Real-time progress tracking
+- One-click folder opening
+- Error notifications with helpful messages
+
+## 🆘 Troubleshooting
+
+### yt-dlp not found
+The app will offer to install yt-dlp automatically. If that fails:
+```bash
+python -m pip install yt-dlp
+# or
+pip install yt-dlp
+```
+
+### Python not found
+Download and install Python from [python.org](https://www.python.org/downloads/)
+
+### Download fails
+- Check your internet connection
+- Verify the video URL is correct and accessible
+- Some videos may be region-restricted or private
+- Try updating yt-dlp: `pip install -U yt-dlp`
+
+### App won't start
+```bash
+# Reinstall dependencies
+npm install
+# Try running in dev mode
+npm run dev
+```
+
+## 🔧 Technical Details
+
+### Architecture
+- **Electron**: Cross-platform desktop framework
+- **Main Process** (`main.js`): Handles system operations, file system, and yt-dlp
+- **Renderer Process** (`renderer.js`): UI logic and user interactions
+- **IPC Communication**: Secure messaging between processes
+
+### File Structure
+```
+video-downloader/
+├── assets/          # Application icons and images
+├── index.html       # Main UI structure
+├── styles.css       # Modern dark theme styling
+├── renderer.js      # Frontend JavaScript
+├── main.js          # Electron main process
+├── index.js         # Legacy CLI interface
+├── package.json     # Dependencies and scripts
+└── README.md        # This file
+```
+
+## 📝 Supported Websites
+
+YouTube, Facebook, Instagram, TikTok, Twitter, Vimeo, Dailymotion, Reddit, Twitch, and 1000+ more!
+
+Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+
+## 🎉 What's New in v3.0
+
+- ✅ Complete GUI redesign with modern dark theme
+- ✅ Real-time download progress visualization
+- ✅ Video thumbnail and info preview
+- ✅ Quality selection (Best, 1080p, 720p, 480p, Audio Only)
+- ✅ One-click folder opening after download
+- ✅ Automatic yt-dlp installation
+- ✅ Better error handling and user feedback
+- ✅ Windows installer build support
+
+## 📄 License
+
+ISC License
+
+## 🙏 Credits
+
+Powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) - The best video downloader
+````
+
+- Update yt-dlp: `python -m pip install -U yt-dlp`
+- Check if video is public
+- Try a different video
+
+### Dialog doesn't appear
+
+- Make sure you're on Windows
+- Run PowerShell as administrator
+
+## 📝 Notes
+
+- Private/age-restricted videos may not work
+- Some videos are geo-blocked
+- First download may take a moment to start
+
+## ✅ Tested On
+
+- ✅ YouTube
+- ✅ YouTube Music
+- ✅ Facebook
+- ✅ Instagram
+- ✅ TikTok
+- ✅ Twitter/X
+
+---
+
+**Simple. Fast. Reliable.** 🎉

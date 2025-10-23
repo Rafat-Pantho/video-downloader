@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Downloaded videos
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.webm
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+
+# Build outputs (do not commit installers or unpacked apps)
+dist/
+build/
+out/
+
+# Electron artifacts
+*.exe
+*.msi
+*.blockmap
+*.7z
+*.zip
+
+# Coverage / test
+coverage/

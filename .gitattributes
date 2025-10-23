@@ -1,0 +1,21 @@
+# Auto-detect text files and perform LF normalization
+* text=auto
+
+# Force line endings for common file types
+*.js text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Treat images and binaries as binary
+*.png binary
+*.ico binary
+*.exe binary
+*.zip binary
+*.7z binary
+*.mp4 binary
+*.mkv binary
+*.webm binary
