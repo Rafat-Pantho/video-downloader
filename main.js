@@ -236,14 +236,16 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       '--no-playlist',
       '--progress',
       '--newline',
-      // Force ffmpeg to merge video and audio
-      '--postprocessor-args', 'ffmpeg:-c copy',
       // Embed metadata
       '--embed-metadata',
-      // Prefer formats that don't need merging, but merge if needed
-      '--prefer-free-formats',
       url
     ];
+
+    // Add ffmpeg location if available
+    if (FFMPEG_DIR) {
+      const ffmpegExe = path.join(FFMPEG_DIR, 'ffmpeg.exe');
+      args.splice(args.length - 1, 0, '--ffmpeg-location', ffmpegExe);
+    }
 
     // Set ffmpeg location if we have bundled version
     const spawnOptions = {};
