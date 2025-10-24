@@ -126,8 +126,12 @@ async function main() {
 
 // Only run if we're on Windows and ffmpeg doesn't exist
 if (process.platform === 'win32') {
-  main().catch(console.error);
+  main().catch((err) => {
+    console.error('FFmpeg download error:', err.message);
+    console.log('Continuing without FFmpeg - some features may be limited');
+    // Don't exit with error - make it non-fatal
+  });
 } else {
   console.log('FFmpeg auto-download is only supported on Windows');
-  console.log('Please install ffmpeg manually: https://ffmpeg.org/download.html');
+  console.log('On Linux/macOS, FFmpeg will be installed via CI package managers or system packages');
 }

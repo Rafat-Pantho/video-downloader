@@ -57,17 +57,24 @@ async function main() {
     return;
   }
 
+  if (process.platform !== 'win32') {
+    console.log('yt-dlp download is only for Windows builds');
+    console.log('On Linux/macOS, yt-dlp will be installed via system packages');
+    return;
+  }
+
   console.log('Downloading yt-dlp.exe...');
   try {
     await downloadFile(YTDLP_URL, YTDLP_PATH);
-    // Make executable on Unix-like systems
-    if (process.platform !== 'win32') {
-      fs.chmodSync(YTDLP_PATH, 0o755);
-    }
   } catch (error) {
     console.error('Failed to download yt-dlp:', error.message);
-    process.exit(1);
+    console.log('Continuing without yt-dlp - it may need to be installed manually');
+    // Don't exit with error - make it non-fatal
   }
 }
 
-main();
+main().catch((err) => {
+  console.error('yt-dlp download error:', err.message);
+  console.log('Continuing without yt-dlp - some features may be limited');
+  // Don't exit with error
+});
