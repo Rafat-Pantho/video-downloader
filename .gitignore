@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Bundled yt-dlp executable (downloaded during postinstall)
+bin/
+
 # Downloaded videos
 *.mp4
 *.avi

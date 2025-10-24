@@ -11,6 +11,49 @@ const __dirname = path.dirname(__filename);
 
 const execPromise = promisify(exec);
 
+// Get bundled yt-dlp path
+function getYtDlpPath() {
+  // In production, use bundled yt-dlp
+  if (app.isPackaged) {
+    const ytdlpPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'bin', 'yt-dlp.exe');
+    if (fs.existsSync(ytdlpPath)) {
+      return ytdlpPath;
+    }
+  }
+  
+  // In development, use bin folder
+  const devPath = path.join(__dirname, 'bin', 'yt-dlp.exe');
+  if (fs.existsSync(devPath)) {
+    return devPath;
+  }
+  
+  // Fallback to system yt-dlp
+  return 'yt-dlp';
+}
+
+// Get bundled ffmpeg path
+function getFFmpegPath() {
+  // In production
+  if (app.isPackaged) {
+    const ffmpegPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'bin', 'ffmpeg.exe');
+    if (fs.existsSync(ffmpegPath)) {
+      return path.dirname(ffmpegPath);
+    }
+  }
+  
+  // In development
+  const devPath = path.join(__dirname, 'bin', 'ffmpeg.exe');
+  if (fs.existsSync(devPath)) {
+    return path.dirname(devPath);
+  }
+  
+  // Fallback to system PATH
+  return null;
+}
+
+const YTDLP_PATH = getYtDlpPath();
+const FFMPEG_DIR = getFFmpegPath();
+
 let mainWindow;
 
 function createWindow() {
@@ -59,27 +102,26 @@ app.on('activate', () => {
 // Check yt-dlp installation
 ipcMain.handle('check-ytdlp', async () => {
   try {
-    const { stdout } = await execPromise('yt-dlp --version');
+    const { stdout } = await execPromise(`"${YTDLP_PATH}" --version`);
     return { installed: true, version: stdout.trim() };
   } catch (error) {
     return { installed: false, version: null };
   }
 });
 
-// Install yt-dlp
+// Install yt-dlp (not needed with bundled version, but kept for compatibility)
 ipcMain.handle('install-ytdlp', async () => {
-  try {
-    await execPromise('python -m pip install -U yt-dlp');
+  // Since we bundle yt-dlp, just check if it exists
+  if (fs.existsSync(YTDLP_PATH)) {
     return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
   }
+  return { success: false, error: 'Bundled yt-dlp not found' };
 });
 
 // Get video info
 ipcMain.handle('get-video-info', async (event, url) => {
   try {
-    const { stdout } = await execPromise(`yt-dlp --get-title --get-duration --get-thumbnail "${url}"`, { 
+    const { stdout } = await execPromise(`"${YTDLP_PATH}" --get-title --get-duration --get-thumbnail "${url}"`, { 
       timeout: 30000 
     });
     const lines = stdout.trim().split('\n');
@@ -145,10 +187,25 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       '--no-playlist',
       '--progress',
       '--newline',
+      // Force ffmpeg to merge video and audio
+      '--postprocessor-args', 'ffmpeg:-c copy',
+      // Embed metadata
+      '--embed-metadata',
+      // Prefer formats that don't need merging, but merge if needed
+      '--prefer-free-formats',
       url
     ];
 
-    const ytdlp = spawn('yt-dlp', args);
+    // Set ffmpeg location if we have bundled version
+    const spawnOptions = {};
+    if (FFMPEG_DIR) {
+      spawnOptions.env = {
+        ...process.env,
+        PATH: `${FFMPEG_DIR};${process.env.PATH}`
+      };
+    }
+
+    const ytdlp = spawn(YTDLP_PATH, args, spawnOptions);
     let lastProgress = 0;
 
     ytdlp.stdout.on('data', (data) => {
