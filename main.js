@@ -11,6 +11,9 @@ const __dirname = path.dirname(__filename);
 
 const execPromise = promisify(exec);
 
+// Disable GPU cache to prevent cache errors
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+
 // Get bundled yt-dlp path
 function getYtDlpPath() {
   // In production, use bundled yt-dlp

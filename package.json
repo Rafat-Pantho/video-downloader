@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "node postinstall.js",
-    "start": "electron .",
+    "start": "electron . --disable-gpu-shader-disk-cache",
     "dev": "electron . --dev",
     "cli": "node index.js",
     "build": "electron-builder --win",
