@@ -121,10 +121,38 @@ ipcMain.handle('install-ytdlp', async () => {
 // Get video info
 ipcMain.handle('get-video-info', async (event, url) => {
   try {
-    const { stdout } = await execPromise(`"${YTDLP_PATH}" --get-title --get-duration --get-thumbnail "${url}"`, { 
-      timeout: 30000 
+    // Use spawn instead of exec to handle stderr warnings properly
+    const result = await new Promise((resolve, reject) => {
+      const process = spawn(YTDLP_PATH, ['--get-title', '--get-duration', '--get-thumbnail', url], {
+        timeout: 30000,
+        env: { ...process.env, PATH: `${FFMPEG_DIR};${process.env.PATH}` }
+      });
+      
+      let stdout = '';
+      let stderr = '';
+      
+      process.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      
+      process.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+      
+      process.on('close', (code) => {
+        // YouTube warnings are sent to stderr but don't indicate failure
+        // Only reject if exit code is non-zero AND we got no stdout
+        if (code !== 0 && !stdout.trim()) {
+          reject(new Error(stderr || `Process exited with code ${code}`));
+        } else {
+          resolve({ stdout, stderr });
+        }
+      });
+      
+      process.on('error', reject);
     });
-    const lines = stdout.trim().split('\n');
+    
+    const lines = result.stdout.trim().split('\n');
     return {
       success: true,
       title: lines[0]?.replace(/[<>:"/\\|?*]/g, '_').substring(0, 100) || 'video',

@@ -4,18 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## v3.1.1 - 2025-10-24
-
-### Fixed
-
-- **yt-dlp signature extraction errors**: Updated to always download the latest yt-dlp version to fix YouTube signature extraction failures.
-- Restored v3.0.9 release in version history for users who need the previous working version.
-- Removed automatic purge of old releases from CI workflow to preserve version history.
-
-### Changed
-
-- Improved download script messaging to indicate how to force re-download of latest yt-dlp version.
-
 ## v3.1.0 - 2025-10-24
 
 ### Added
@@ -24,16 +12,21 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Automatic download of yt-dlp and FFmpeg during installation via postinstall scripts.
 - `download-ytdlp.js` script to fetch the latest yt-dlp executable from GitHub.
 - `download-ffmpeg.js` script to download and extract FFmpeg essentials.
+- `postinstall.js` wrapper for cross-platform CI compatibility.
 
 ### Fixed
 
 - **Video and audio merge issue**: Fixed problem where video and audio were downloaded as separate files on some systems by adding `--merge-output-format` and `--postprocessor-args` flags.
+- **YouTube warnings treated as errors**: Changed `get-video-info` to use spawn instead of exec to properly handle YouTube's SABR streaming warnings without failing.
 - Path detection for bundled executables in both development and production environments.
+- npm ci failures in CI by updating package-lock.json.
+- Postinstall scripts made non-fatal and platform-aware.
 
 ### Changed
 
 - Modified `main.js` to use bundled yt-dlp and FFmpeg executables with proper PATH injection.
 - Updated electron-builder configuration to include `bin/**/*` files in the unpacked resources.
+- Removed automatic purge of old releases from CI workflow to preserve version history.
 
 ## v3.0.1 - 2025-10-24
 
