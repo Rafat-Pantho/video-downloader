@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
-## v3.1.0 - 2025-01-XX
+## v3.1.1 - 2025-10-24
+
+### Fixed
+
+- **yt-dlp signature extraction errors**: Updated to always download the latest yt-dlp version to fix YouTube signature extraction failures.
+- Restored v3.0.9 release in version history for users who need the previous working version.
+- Removed automatic purge of old releases from CI workflow to preserve version history.
+
+### Changed
+
+- Improved download script messaging to indicate how to force re-download of latest yt-dlp version.
+
+## v3.1.0 - 2025-10-24
 
 ### Added
 
