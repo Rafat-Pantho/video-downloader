@@ -114,25 +114,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Purge previous releases and tags (keep current)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          current_tag="${GITHUB_REF_NAME}"
-          echo "Current tag: $current_tag"
-          echo "Listing existing releases..."
-          # Delete all releases except the current tag
-          for tag in $(gh release list --limit 100 --json tagName -q '.[].tagName' || true); do
-            if [ "$tag" != "$current_tag" ]; then
-              echo "Deleting release $tag"
-              gh release delete "$tag" -y || true
-              echo "Deleting tag ref $tag"
-              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/tags/$tag" || true
-            fi
-          done
+      # Purge step removed - keep all releases for version history
+      # Users can manually delete old releases if needed
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4

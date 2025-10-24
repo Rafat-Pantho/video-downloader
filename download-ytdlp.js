@@ -53,7 +53,7 @@ async function main() {
 
   // Check if yt-dlp.exe already exists
   if (fs.existsSync(YTDLP_PATH)) {
-    console.log('✓ yt-dlp.exe already exists');
+    console.log('✓ yt-dlp.exe already exists (delete bin/yt-dlp.exe to force re-download latest version)');
     return;
   }
 
@@ -63,7 +63,7 @@ async function main() {
     return;
   }
 
-  console.log('Downloading yt-dlp.exe...');
+  console.log('Downloading latest yt-dlp.exe from GitHub releases...');
   try {
     await downloadFile(YTDLP_URL, YTDLP_PATH);
   } catch (error) {
