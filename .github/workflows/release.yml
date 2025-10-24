@@ -123,11 +123,25 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: List downloaded artifacts
+        shell: bash
+        run: |
+          echo "=== Contents of artifacts directory ==="
+          ls -R artifacts/
+          echo "=== Finding all files to upload ==="
+          find artifacts -type f
+
       - name: Create/Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Video Downloader ${{ github.ref_name }}
-          files: artifacts/**/*
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.dmg
+            artifacts/**/*.zip
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.blockmap
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
