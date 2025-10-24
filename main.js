@@ -123,7 +123,7 @@ ipcMain.handle('get-video-info', async (event, url) => {
   try {
     // Use spawn instead of exec to handle stderr warnings properly
     const result = await new Promise((resolve, reject) => {
-      const process = spawn(YTDLP_PATH, ['--get-title', '--get-duration', '--get-thumbnail', url], {
+      const childProcess = spawn(YTDLP_PATH, ['--get-title', '--get-duration', '--get-thumbnail', url], {
         timeout: 30000,
         env: { ...process.env, PATH: `${FFMPEG_DIR};${process.env.PATH}` }
       });
@@ -131,15 +131,15 @@ ipcMain.handle('get-video-info', async (event, url) => {
       let stdout = '';
       let stderr = '';
       
-      process.stdout.on('data', (data) => {
+      childProcess.stdout.on('data', (data) => {
         stdout += data.toString();
       });
       
-      process.stderr.on('data', (data) => {
+      childProcess.stderr.on('data', (data) => {
         stderr += data.toString();
       });
       
-      process.on('close', (code) => {
+      childProcess.on('close', (code) => {
         // YouTube warnings are sent to stderr but don't indicate failure
         // Only reject if exit code is non-zero AND we got no stdout
         if (code !== 0 && !stdout.trim()) {
@@ -149,7 +149,7 @@ ipcMain.handle('get-video-info', async (event, url) => {
         }
       });
       
-      process.on('error', reject);
+      childProcess.on('error', reject);
     });
     
     const lines = result.stdout.trim().split('\n');
