@@ -126,8 +126,15 @@ ipcMain.handle('get-video-info', async (event, url) => {
   try {
     // Use spawn instead of exec to handle stderr warnings properly
     const result = await new Promise((resolve, reject) => {
-      const childProcess = spawn(YTDLP_PATH, ['--get-title', '--get-duration', '--get-thumbnail', url], {
-        timeout: 30000,
+      const childProcess = spawn(YTDLP_PATH, [
+        '--no-playlist',  // Only get info for single video, not entire playlist
+        '--no-warnings',  // Reduce noise from warnings
+        '--get-title', 
+        '--get-duration', 
+        '--get-thumbnail', 
+        url
+      ], {
+        timeout: 60000,  // Increased to 60 seconds for slower platforms
         env: { ...process.env, PATH: `${FFMPEG_DIR};${process.env.PATH}` }
       });
       
@@ -146,7 +153,18 @@ ipcMain.handle('get-video-info', async (event, url) => {
         // YouTube warnings are sent to stderr but don't indicate failure
         // Only reject if exit code is non-zero AND we got no stdout
         if (code !== 0 && !stdout.trim()) {
-          reject(new Error(stderr || `Process exited with code ${code}`));
+          // Provide better error messages based on the error content
+          let errorMsg = stderr || `Process exited with code ${code}`;
+          if (stderr.includes('Cannot parse data')) {
+            errorMsg = 'Unable to extract video info. The platform may require login or the link may be invalid.';
+          } else if (stderr.includes('Unsupported URL')) {
+            errorMsg = 'This URL is not supported by yt-dlp.';
+          } else if (stderr.includes('Video unavailable')) {
+            errorMsg = 'This video is unavailable or private.';
+          } else if (stderr.includes('This video requires payment')) {
+            errorMsg = 'This video requires payment to access.';
+          }
+          reject(new Error(errorMsg));
         } else {
           resolve({ stdout, stderr });
         }
