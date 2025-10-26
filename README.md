@@ -1,4 +1,4 @@
-# Video Downloader v3.0 - GUI Edition
+# Video Downloader v3.1.1 - GUI Edition
 
 ![Build](https://github.com/Rafat-Pantho/video-downloader/actions/workflows/release.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/Rafat-Pantho/video-downloader)
@@ -40,31 +40,29 @@ A modern, beautiful desktop application for downloading videos from YouTube, Fac
 
 ### First Time Setup
 
-1. **Install Dependencies**
+1. **Install dependencies**
 
 ```bash
 npm install
 ```
 
-1. **Install Python & yt-dlp** (if not already installed)
-
-```bash
-pip install yt-dlp
-```
-
-1. **Run the Application**
+2. **Run the application**
 
 ```bash
 npm start
 ```
 
-The app will check for yt-dlp on startup and offer to install it if needed.
+Notes:
+- The application ships with a bundled `yt-dlp` and will automatically download a bundled `ffmpeg` on Windows during postinstall if not present. No separate Python or manual yt-dlp/ffmpeg installation is required.
+- If an automatic ffmpeg download fails, the app will still run but some merging features may require a system `ffmpeg`.
 
 ## 📋 Requirements
 
 - Node.js 18+
-- Python 3.6+
-- Windows 10/11 (for GUI)
+- Windows 10/11 / macOS / Linux (desktop builds supported)
+
+Notes:
+- Python is no longer required — `yt-dlp` is bundled with the app.
 
 ## 🎯 How to Use
 
@@ -101,9 +99,9 @@ The installer will be created in the `dist` folder.
 Tagging a version will automatically build the Windows installer and attach it to a GitHub Release.
 
 ```powershell
-# Create and push a version tag
-git tag v3.0.1
-git push origin v3.0.1
+# Create and push a version tag (example)
+git tag v3.1.1
+git push origin v3.1.1
 ```
 
 The workflow lives at `.github/workflows/release.yml` and uploads:
@@ -250,16 +248,16 @@ YouTube, Facebook, Instagram, TikTok, Twitter, Vimeo, Dailymotion, Reddit, Twitc
 
 Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 
-## 🎉 What's New in v3.0
+## 🎉 What's New in v3.1.1
 
-- ✅ Complete GUI redesign with modern dark theme
-- ✅ Real-time download progress visualization
-- ✅ Video thumbnail and info preview
-- ✅ Quality selection (Best, 1080p, 720p, 480p, Audio Only)
-- ✅ One-click folder opening after download
-- ✅ Automatic yt-dlp installation
-- ✅ Better error handling and user feedback
-- ✅ Windows installer build support
+- ✅ Bundled yt-dlp (no Python required)
+- ✅ Bundled ffmpeg for Windows with reliable downloader (handles HTTP redirects)
+- ✅ Fixed video+audio merging by explicitly providing bundled ffmpeg location
+- ✅ Fixed YouTube Music playlist info fetch (now uses --no-playlist for single links)
+- ✅ Improved error handling and user-friendly messages for unsupported/private/geo-restricted videos
+- ✅ Increased info-fetch timeout for slower platforms (Facebook/Instagram)
+- ✅ CI/release fixes: explicit artifact globs and release upload reliability
+- ✅ Minor dev-quality fixes (GPU cache suppression, variable renames)
 
 ## 📄 License
 
