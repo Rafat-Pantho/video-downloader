@@ -1,33 +1,41 @@
-# Video Downloader v3.1.1 - GUI Edition
+# Video Downloader v3.2.0 - Desktop Edition
 
 ![Build](https://github.com/Rafat-Pantho/video-downloader/actions/workflows/release.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/Rafat-Pantho/video-downloader)
 ![Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/total)
 ![License](https://img.shields.io/github/license/Rafat-Pantho/video-downloader)
 
-## ⬇️ Download
+## ⬇️ Download v3.2.0
 
-- Latest Windows installer: [Download](https://github.com/Rafat-Pantho/video-downloader/releases/latest)
-- Latest release downloads: ![Latest Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/latest/total)
+- Latest release: [v3.2.0](https://github.com/Rafat-Pantho/video-downloader/releases/tag/v3.2.0)
+- All releases: [Releases page](https://github.com/Rafat-Pantho/video-downloader/releases)
 
-### Direct links (latest)
+### Direct download links (v3.2.0)
 
-- Windows (x64): [video-downloader-win-x64.exe](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-win-x64.exe)
-- macOS (arm64): [video-downloader-mac-arm64.dmg](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-mac-arm64.dmg)
-  - Optional portable: [video-downloader-mac-arm64.zip](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-mac-arm64.zip)
-- Linux (x64 AppImage): [video-downloader-linux-x64.AppImage](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-linux-x64.AppImage)
-  - Debian/Ubuntu: [video-downloader-linux-x64.deb](https://github.com/Rafat-Pantho/video-downloader/releases/latest/download/video-downloader-linux-x64.deb)
+- **Windows (x64)**: [video-downloader-v3.2.0-win-x64.exe](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-win-x64.exe) (~150 MB)
+- **macOS (arm64)**: [video-downloader-v3.2.0-mac-arm64.dmg](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-mac-arm64.dmg)
+  - Optional portable: [video-downloader-v3.2.0-mac-arm64.zip](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-mac-arm64.zip)
+- **Linux (x64 AppImage)**: [video-downloader-v3.2.0-linux-x64.AppImage](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-linux-x64.AppImage)
+  - Debian/Ubuntu: [video-downloader-v3.2.0-linux-x64.deb](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-linux-x64.deb)
+
+**Platform Support:**
+
+- ✅ Windows 10/11 (64-bit)
+- ✅ macOS 10.13+ (Intel and Apple Silicon)
+- ✅ Linux (Ubuntu, Debian, Fedora, etc.)
+- ⏳ Android version planned for future release
 
 Notes:
 
 - macOS builds may be unsigned; right-click the app and choose Open on first launch.
-- For AppImage on Linux, run: chmod +x video-downloader-linux-x64.AppImage
+- For AppImage on Linux, run: `chmod +x video-downloader-v3.2.0-linux-x64.AppImage`
 
-A modern, beautiful desktop application for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
+A modern, beautiful **desktop application** for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
 ## ✨ Features
 
-- 🎨 **Modern GUI** - Beautiful, dark-themed Windows native interface
+- 🎨 **Modern GUI** - Beautiful, dark-themed cross-platform interface
+- 🔐 **Embedded Login** - No browser extensions needed! Login directly in the app for private/age-restricted videos
 - 🚀 **Easy to Use** - Simple, intuitive workflow
 - 📥 **Multi-Platform** - YouTube, Facebook, Instagram, TikTok, Twitter, and 1000+ sites
 - 🎬 **Quality Options** - Choose from Best, 1080p, 720p, 480p, or Audio Only
@@ -53,6 +61,7 @@ npm start
 ```
 
 Notes:
+
 - The application ships with a bundled `yt-dlp` and will automatically download a bundled `ffmpeg` on Windows during postinstall if not present. No separate Python or manual yt-dlp/ffmpeg installation is required.
 - If an automatic ffmpeg download fails, the app will still run but some merging features may require a system `ffmpeg`.
 
@@ -62,6 +71,7 @@ Notes:
 - Windows 10/11 / macOS / Linux (desktop builds supported)
 
 Notes:
+
 - Python is no longer required — `yt-dlp` is bundled with the app.
 
 ## 🎯 How to Use
@@ -248,7 +258,19 @@ YouTube, Facebook, Instagram, TikTok, Twitter, Vimeo, Dailymotion, Reddit, Twitc
 
 Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 
-## 🎉 What's New in v3.1.1
+## 🎉 What's New in v3.2.0
+
+### NEW: Embedded Browser Login 🔐
+
+- ✅ **No browser extensions needed** - Login directly in the app
+- ✅ **Automatic detection** - App prompts for login when private/restricted videos are detected
+- ✅ **Access private videos** - Download from private Facebook groups
+- ✅ **Age-restricted YouTube** - Bypass age restrictions with your account
+- ✅ **Multi-site support** - Works with Facebook, YouTube, Instagram, Twitter, and more
+- ✅ **Secure storage** - Session cookies saved locally on your device
+- ✅ **Persistent login** - Stay logged in for future downloads
+
+### All v3.1.x Features
 
 - ✅ Bundled yt-dlp (no Python required)
 - ✅ Bundled ffmpeg for Windows with reliable downloader (handles HTTP redirects)
@@ -257,7 +279,42 @@ Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master
 - ✅ Improved error handling and user-friendly messages for unsupported/private/geo-restricted videos
 - ✅ Increased info-fetch timeout for slower platforms (Facebook/Instagram)
 - ✅ CI/release fixes: explicit artifact globs and release upload reliability
-- ✅ Minor dev-quality fixes (GPU cache suppression, variable renames)
+
+## 🔐 Using Embedded Login for Private Videos
+
+The app now features **built-in browser login** - no need to install any browser extensions!
+
+### How It Works:
+
+1. **Try to download** a private or age-restricted video
+2. **App detects** the restriction automatically
+3. **Login prompt** appears - click "Login" 
+4. **Browser window** opens within the app
+5. **Login normally** to the website (Facebook, YouTube, etc.)
+6. **Close the window** when done - your session is saved!
+7. **Download again** - the video will now download successfully
+
+### Supported Scenarios:
+
+- 🔒 Private Facebook group videos
+- 🔞 Age-restricted YouTube videos  
+- 👥 Member-only content
+- 🔐 Videos requiring authentication
+- 📱 Instagram private accounts
+- 🐦 Twitter/X protected tweets
+
+### Manual Login:
+
+You can also login proactively:
+
+1. Click the **"Login"** button in the app
+2. Login to your account
+3. Close the window
+4. Your session is saved for future downloads
+
+### Logout:
+
+Click **"Logout"** to clear all saved cookies and sessions.
 
 ## 📄 License
 

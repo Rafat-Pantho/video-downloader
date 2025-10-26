@@ -28,6 +28,10 @@ const downloadAnotherBtn = document.getElementById('downloadAnotherBtn');
 const ytdlpVersion = document.getElementById('ytdlpVersion');
 const statusBanner = document.getElementById('statusBanner');
 const statusMessage = document.getElementById('statusMessage');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginStatus = document.getElementById('loginStatus');
+const loggedDomains = document.getElementById('loggedDomains');
 
 let currentVideoUrl = '';
 let currentFolder = '';
@@ -64,6 +68,9 @@ async function init() {
   // Set default folder
   folderInput.value = path.join(os.homedir(), 'Downloads');
   currentFolder = folderInput.value;
+  
+  // Check login status
+  await updateLoginStatus();
 }
 
 // Show status banner
@@ -201,6 +208,20 @@ downloadBtn.addEventListener('click', async () => {
       completeSize.textContent = result.size ? `${result.size} MB` : 'Unknown';
       
       showStatus('✅ Download completed successfully!', 'success');
+    } else if (result.needsLogin) {
+      // Video requires login
+      progressSection.classList.add('hidden');
+      downloadSettings.classList.remove('hidden');
+      
+      const shouldLogin = confirm(result.error + '\n\nWould you like to login now?');
+      if (shouldLogin) {
+        const loginResult = await ipcRenderer.invoke('open-login-window', result.url);
+        if (loginResult.success) {
+          showStatus('🔐 Login window opened. Please login, then close the window and try downloading again.', 'info');
+        }
+      } else {
+        showStatus('❌ ' + result.error, 'error');
+      }
     } else {
       progressSection.classList.add('hidden');
       downloadSettings.classList.remove('hidden');
@@ -251,6 +272,65 @@ downloadAnotherBtn.addEventListener('click', () => {
   urlInput.focus();
   
   showStatus('✨ Ready for a new download', 'info');
+});
+
+// Login management
+async function updateLoginStatus() {
+  const result = await ipcRenderer.invoke('check-login-status');
+  if (result.success && result.loggedIn) {
+    loginStatus.textContent = `Logged in (${result.cookieCount} cookies)`;
+    loginStatus.classList.add('logged-in');
+    logoutBtn.disabled = false;
+    
+    // Display domains
+    loggedDomains.innerHTML = '';
+    if (result.domains && result.domains.length > 0) {
+      result.domains.forEach(domain => {
+        const badge = document.createElement('span');
+        badge.className = 'domain-badge';
+        badge.textContent = domain;
+        loggedDomains.appendChild(badge);
+      });
+    }
+  } else {
+    loginStatus.textContent = 'Not logged in';
+    loginStatus.classList.remove('logged-in');
+    logoutBtn.disabled = true;
+    loggedDomains.innerHTML = '';
+  }
+}
+
+loginBtn.addEventListener('click', async () => {
+  // Use the current URL or a default one
+  const url = currentVideoUrl || 'https://www.youtube.com';
+  const result = await ipcRenderer.invoke('open-login-window', url);
+  
+  if (result.success) {
+    showStatus('🔐 Login window opened. Please login and close the window when done.', 'info');
+    
+    // Check status after a delay to allow cookies to be saved
+    setTimeout(async () => {
+      await updateLoginStatus();
+      const statusCheck = await ipcRenderer.invoke('check-login-status');
+      if (statusCheck.loggedIn) {
+        showStatus('✅ Login successful! You can now download private/restricted videos.', 'success');
+      }
+    }, 2000);
+  } else {
+    showStatus('❌ Failed to open login window: ' + result.error, 'error');
+  }
+});
+
+logoutBtn.addEventListener('click', async () => {
+  if (confirm('Are you sure you want to logout? This will clear all saved cookies.')) {
+    const result = await ipcRenderer.invoke('clear-cookies');
+    if (result.success) {
+      await updateLoginStatus();
+      showStatus('✅ Logged out successfully', 'success');
+    } else {
+      showStatus('❌ Failed to logout: ' + result.error, 'error');
+    }
+  }
 });
 
 // Enter key on URL input
