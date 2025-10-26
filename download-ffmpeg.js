@@ -17,7 +17,8 @@ function downloadFile(url, dest) {
     const file = fs.createWriteStream(dest);
     
     https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (response) => {
-      if (response.statusCode === 302 || response.statusCode === 301) {
+      // Handle all redirect status codes
+      if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 303 || response.statusCode === 307 || response.statusCode === 308) {
         file.close();
         fs.unlinkSync(dest);
         return downloadFile(response.headers.location, dest).then(resolve).catch(reject);
