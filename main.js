@@ -83,6 +83,9 @@ function createWindow() {
 
   mainWindow.loadFile('react-index.html');
 
+  // Open DevTools in development
+  mainWindow.webContents.openDevTools();
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });

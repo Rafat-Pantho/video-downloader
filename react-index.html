@@ -46,8 +46,16 @@
     // Load the bundled React app
     const script = document.createElement('script');
     script.src = './dist/bundle.js';
+    script.onerror = (error) => {
+      console.error('Failed to load bundle.js:', error);
+      document.getElementById('loading').innerHTML = 'Failed to load application. Please check console.';
+    };
     script.onload = () => {
-      document.getElementById('loading').remove();
+      console.log('Bundle loaded successfully');
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.remove();
+      }
     };
     document.body.appendChild(script);
   </script>
