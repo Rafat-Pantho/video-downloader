@@ -8,6 +8,7 @@ function HomePage() {
   const [folder, setFolder] = useState('');
   const [filename, setFilename] = useState('');
   const [format, setFormat] = useState('mp4');
+  const [audioFormat, setAudioFormat] = useState('mp3');
   const [quality, setQuality] = useState('best');
   const [status, setStatus] = useState({ message: '', type: '' });
   const [videoInfo, setVideoInfo] = useState(null);
@@ -79,7 +80,7 @@ function HomePage() {
       url,
       folder,
       filename,
-      format,
+      format: quality === 'audio' ? audioFormat : format,
       quality
     });
 
@@ -204,13 +205,23 @@ function HomePage() {
 
           <div className="settings-row">
             <div className="input-group">
-              <label>Format</label>
-              <select value={format} onChange={(e) => setFormat(e.target.value)}>
-                <option value="mp4">MP4 (Recommended)</option>
-                <option value="mkv">MKV</option>
-                <option value="webm">WebM</option>
-                <option value="avi">AVI</option>
-              </select>
+              <label>{quality === 'audio' ? 'Audio Format' : 'Video Format'}</label>
+              {quality === 'audio' ? (
+                <select value={audioFormat} onChange={(e) => setAudioFormat(e.target.value)}>
+                  <option value="mp3">MP3 (Recommended)</option>
+                  <option value="m4a">M4A (AAC)</option>
+                  <option value="opus">Opus</option>
+                  <option value="flac">FLAC (Lossless)</option>
+                  <option value="wav">WAV (Uncompressed)</option>
+                </select>
+              ) : (
+                <select value={format} onChange={(e) => setFormat(e.target.value)}>
+                  <option value="mp4">MP4 (Recommended)</option>
+                  <option value="mkv">MKV</option>
+                  <option value="webm">WebM</option>
+                  <option value="avi">AVI</option>
+                </select>
+              )}
             </div>
 
             <div className="input-group">
@@ -231,7 +242,7 @@ function HomePage() {
             disabled={downloading}
             style={{ width: '100%', marginTop: '12px' }}
           >
-            {downloading ? 'Downloading...' : 'Download Video'}
+            {downloading ? 'Downloading...' : quality === 'audio' ? 'Download Audio' : 'Download Video'}
           </button>
         </div>
       )}

@@ -306,6 +306,8 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
     
     // Build format string based on quality
     let formatString;
+    const isAudioOnly = quality === 'audio';
+    
     switch(quality) {
       case 'best':
         formatString = 'bestvideo+bestaudio/best';
@@ -328,26 +330,35 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
     
     const args = [
       '--format', formatString,
-      '--merge-output-format', format,
       '--output', outputPath,
       '--no-playlist',
       '--progress',
       '--newline',
       // Embed metadata
       '--embed-metadata',
-      url
     ];
+
+    // For audio only, extract audio and convert to specified format
+    if (isAudioOnly) {
+      args.push('--extract-audio');
+      args.push('--audio-format', format);
+      args.push('--audio-quality', '0'); // Best quality
+    } else {
+      args.push('--merge-output-format', format);
+    }
 
     // Add cookies if available
     if (fs.existsSync(COOKIES_PATH)) {
-      args.splice(args.length - 1, 0, '--cookies', COOKIES_PATH);
+      args.push('--cookies', COOKIES_PATH);
     }
 
     // Add ffmpeg location if available
     if (FFMPEG_DIR) {
       const ffmpegExe = path.join(FFMPEG_DIR, 'ffmpeg.exe');
-      args.splice(args.length - 1, 0, '--ffmpeg-location', ffmpegExe);
+      args.push('--ffmpeg-location', ffmpegExe);
     }
+
+    args.push(url);
 
     // Set ffmpeg location if we have bundled version
     const spawnOptions = {};
