@@ -9,6 +9,12 @@ This release brings a complete user interface overhaul with a modern, eye-soothi
 - **React.js Integration**: Complete rewrite of the UI using React for a more responsive and maintainable codebase
 - **Purple Gradient Theme**: Beautiful gradient from light purple to dark purple for a pleasant viewing experience
 - **Hideable Navigation Sidebar**: 260px sidebar with smooth slide animations - toggle on/off as needed
+- **Audio Format Selection**: When "Audio Only" is selected, choose from multiple audio formats:
+  - MP3 (Recommended) - Universal compatibility
+  - M4A (AAC) - Apple ecosystem, high quality
+  - Opus - Modern, efficient codec
+  - FLAC (Lossless) - No quality loss
+  - WAV (Uncompressed) - Maximum quality
 - **Home Page**: Enhanced video download interface with:
   - Video URL input with instant info fetching
   - Thumbnail and video details display
