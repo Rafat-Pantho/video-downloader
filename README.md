@@ -1,22 +1,18 @@
-# Video Downloader v3.2.0 - Desktop Edition
+# Video Downloader v3.3.0 - Desktop Edition
 
 ![Build](https://github.com/Rafat-Pantho/video-downloader/actions/workflows/release.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/Rafat-Pantho/video-downloader)
 ![Downloads](https://img.shields.io/github/downloads/Rafat-Pantho/video-downloader/total)
 ![License](https://img.shields.io/github/license/Rafat-Pantho/video-downloader)
 
-## ⬇️ Download v3.2.0
+## ⬇️ Download v3.3.0
 
-- Latest release: [v3.2.0](https://github.com/Rafat-Pantho/video-downloader/releases/tag/v3.2.0)
+- Latest release: [v3.3.0](https://github.com/Rafat-Pantho/video-downloader/releases/tag/v3.3.0)
 - All releases: [Releases page](https://github.com/Rafat-Pantho/video-downloader/releases)
 
-### Direct download links (v3.2.0)
+### Direct download links (v3.3.0)
 
-- **Windows (x64)**: [video-downloader-v3.2.0-win-x64.exe](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-win-x64.exe) (~150 MB)
-- **macOS (arm64)**: [video-downloader-v3.2.0-mac-arm64.dmg](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-mac-arm64.dmg)
-  - Optional portable: [video-downloader-v3.2.0-mac-arm64.zip](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-mac-arm64.zip)
-- **Linux (x64 AppImage)**: [video-downloader-v3.2.0-linux-x64.AppImage](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-linux-x64.AppImage)
-  - Debian/Ubuntu: [video-downloader-v3.2.0-linux-x64.deb](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.2.0/video-downloader-linux-x64.deb)
+- Visit the v3.3.0 release page to download installers for your platform.
 
 **Platform Support:**
 
@@ -28,13 +24,17 @@
 Notes:
 
 - macOS builds may be unsigned; right-click the app and choose Open on first launch.
-- For AppImage on Linux, run: `chmod +x video-downloader-v3.2.0-linux-x64.AppImage`
+- For AppImage on Linux, run: `chmod +x video-downloader-linux-x64.AppImage`
 
 A modern, beautiful **desktop application** for downloading videos from YouTube, Facebook, Instagram, TikTok, and 1000+ websites.
 
-## ✨ Features
+## ✨ Features (v3.3.0)
 
-- 🎨 **Modern GUI** - Beautiful, dark-themed cross-platform interface
+- 🎨 **Modern React UI** - Complete UI rewrite in React with component-based architecture
+- 💜 **Purple Gradient Theme** - Eye-soothing gradient from light to dark purple
+- 🧭 **Hideable Navigation Sidebar** - Slide-in/out sidebar to switch between pages
+- 🏠 **Home Page** - Video URL input, info preview, settings, and real-time progress
+- 🍪 **Cookie Management Page** - View, edit, and delete cookies (all, multiple, single)
 - 🔐 **Embedded Login** - No browser extensions needed! Login directly in the app for private/age-restricted videos
 - 🚀 **Easy to Use** - Simple, intuitive workflow
 - 📥 **Multi-Platform** - YouTube, Facebook, Instagram, TikTok, Twitter, and 1000+ sites
@@ -63,6 +63,7 @@ A modern, beautiful **desktop application** for downloading videos from YouTube,
 Notes:
 
 - The application ships with a bundled `yt-dlp` and will automatically download a bundled `ffmpeg` on Windows during postinstall if not present. No separate Python or manual yt-dlp/ffmpeg installation is required.
+- `npm start` runs the React build (webpack) and then launches Electron.
 - If an automatic ffmpeg download fails, the app will still run but some merging features may require a system `ffmpeg`.
 
 ## 📋 Requirements
@@ -76,7 +77,7 @@ Notes:
 
 ## 🎯 How to Use
 
-1. **Enter Video URL** - Paste any video URL into the input field
+1. **Enter Video URL** - Paste any video URL into the input field on the Home page
 2. **Fetch Info** - Click "Fetch Info" to retrieve video details
 3. **Configure Settings**:
    - Choose download folder (default: Downloads)
@@ -85,12 +86,16 @@ Notes:
    - Choose quality (Best, 1080p, 720p, 480p, Audio Only)
 4. **Download** - Click "Start Download" and watch the progress
 5. **Complete** - Open folder or download another video
+6. **Toggle Navigation** - Use the ◀/▶ button to show/hide the sidebar
+7. **Manage Cookies** - Switch to the Cookie Management page to view/edit/delete cookies or open the login window
 
 ## 🛠️ Available Scripts
 
 - `npm start` - Launch the GUI application
 - `npm run dev` - Run in development mode
 - `npm run cli` - Use the old CLI interface
+- `npm run webpack` - Build the React bundle once (development mode)
+- `npm run webpack:watch` - Rebuild on changes (development mode)
 - `npm run build` - Build Windows installer (.exe)
 - `npm run build:dir` - Build unpacked app folder
 
@@ -222,22 +227,34 @@ npm run dev
 ### Architecture
 
 - **Electron**: Cross-platform desktop framework
-- **Main Process** (`main.js`): Handles system operations, file system, and yt-dlp
-- **Renderer Process** (`renderer.js`): UI logic and user interactions
+- **Main Process** (`main.js`): Handles system operations, file system, yt-dlp, cookies, and IPC handlers
+- **Renderer** (React): `src/` React components bundled via webpack, loaded by `react-index.html`
 - **IPC Communication**: Secure messaging between processes
 
 ### File Structure
 
 ```text
 video-downloader/
-├── assets/          # Application icons and images
-├── index.html       # Main UI structure
-├── styles.css       # Modern dark theme styling
-├── renderer.js      # Frontend JavaScript
-├── main.js          # Electron main process
-├── index.js         # Legacy CLI interface
-├── package.json     # Dependencies and scripts
-└── README.md        # This file
+├── assets/                 # Application icons and images
+├── react-index.html        # HTML wrapper that loads the React bundle
+├── main.js                 # Electron main process (CommonJS)
+├── src/
+│   ├── App.jsx             # Root React component
+│   ├── App.css             # Global styles (purple gradient theme)
+│   ├── index.jsx           # React entry
+│   └── components/
+│       ├── Navigation.jsx  # Hideable sidebar
+│       ├── HomePage.jsx    # Downloads page
+│       ├── CookieManagement.jsx # Cookie CRUD page
+│       ├── Navigation.css
+│       ├── HomePage.css
+│       └── CookieManagement.css
+├── dist/
+│   └── bundle.js           # Webpack-built React bundle
+├── webpack.config.js       # Webpack configuration (electron-renderer target)
+├── index.js                # Legacy CLI interface
+├── package.json            # Dependencies and scripts
+└── README.md               # This file
 ```
 
 ## 🔐 Code Signing (optional)
@@ -258,7 +275,28 @@ YouTube, Facebook, Instagram, TikTok, Twitter, Vimeo, Dailymotion, Reddit, Twitc
 
 Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 
-## 🎉 What's New in v3.2.0
+## 🎉 What's New in v3.3.0
+
+### Major UI Update (React + Purple Theme)
+
+- ✨ Complete UI redesign using React
+- 💜 Purple gradient theme with glassmorphism cards and smooth animations
+- 🧭 Hideable navigation sidebar (Home, Cookie Management)
+- 🏠 Home Page improvements: info preview, richer settings, progress bar
+- 🍪 Cookie Management: delete all, bulk delete, delete one, edit cookie values
+- 🔌 IPC updates: load/save/clear cookies, open login window
+
+> Tip: The navigation can be toggled with the button at the top-left (◀/▶).
+
+### Developer Experience
+
+- Webpack + Babel pipeline for JSX and CSS
+- Electron renderer targeting for optimal integration
+- CommonJS `main.js` for compatibility (no `type: module` required)
+
+---
+
+## Highlights from v3.2.0
 
 ### NEW: Embedded Browser Login 🔐
 
@@ -270,7 +308,7 @@ Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master
 - ✅ **Secure storage** - Session cookies saved locally on your device
 - ✅ **Persistent login** - Stay logged in for future downloads
 
-### All v3.1.x Features
+### 3.1.x Highlights
 
 - ✅ Bundled yt-dlp (no Python required)
 - ✅ Bundled ffmpeg for Windows with reliable downloader (handles HTTP redirects)
