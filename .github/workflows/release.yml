@@ -64,15 +64,15 @@ jobs:
         if: matrix.os != 'windows-latest'
         shell: bash
         run: |
-          echo "OS ${{ matrix.os }} contents of dist:"
-          ls -la dist || true
+          echo "OS ${{ matrix.os }} contents of release:"
+          ls -la release || true
 
       - name: List build outputs (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          Write-Host "OS windows-latest contents of dist:"
-          if (Test-Path dist) { Get-ChildItem -Recurse dist | Format-Table FullName,Length -Auto }
+          Write-Host "OS windows-latest contents of release:"
+          if (Test-Path release) { Get-ChildItem -Recurse release | Format-Table FullName,Length -Auto }
 
       - name: Prepare release notes from CHANGELOG
         shell: bash
@@ -100,12 +100,12 @@ jobs:
           name: dist-${{ matrix.os }}
           if-no-files-found: ignore
           path: |
-            dist/*.exe
-            dist/*.blockmap
-            dist/*.dmg
-            dist/*.zip
-            dist/*.AppImage
-            dist/*.deb
+            release/*.exe
+            release/*.blockmap
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
 
   publish:
     name: Create GitHub Release and upload assets
