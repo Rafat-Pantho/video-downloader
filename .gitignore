@@ -32,6 +32,7 @@ Thumbs.db
 dist/
 build/
 out/
+release/
 
 # Electron artifacts
 *.exe

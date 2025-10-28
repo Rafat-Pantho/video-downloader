@@ -19,14 +19,22 @@
     "icon": "assets/Gemini_Generated_Image_jjisp6jjisp6jjis.png",
     "artifactName": "video-downloader-${os}-${arch}.${ext}",
     "files": [
-      "**/*",
-      "bin/**/*"
+      "main.js",
+      "react-index.html",
+      "index.js",
+      "postinstall.js",
+      "package.json",
+      "assets/**/*",
+      "bin/**/*",
+      "cookies/**/*",
+      "dist/bundle.js",
+      "dist/bundle.js.map"
     ],
     "asarUnpack": [
       "bin/**/*"
     ],
     "directories": {
-      "output": "dist"
+      "output": "release"
     },
     "win": {
       "target": [
