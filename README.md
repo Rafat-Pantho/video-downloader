@@ -12,7 +12,10 @@
 
 ### Direct download links (v3.3.0)
 
-- Visit the v3.3.0 release page to download installers for your platform.
+- **Windows (x64)**: [video-downloader-v3.3.0-win-x64.exe](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.3.0/video-downloader-win-x64.exe)
+- **macOS (arm64)**: [video-downloader-v3.3.0-mac-arm64.dmg](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.3.0/video-downloader-mac-arm64.dmg)
+  - Optional portable: [video-downloader-v3.3.0-mac-arm64.zip](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.3.0/video-downloader-mac-arm64.zip)
+- **Linux (x64 AppImage)**: [video-downloader-v3.3.0-linux-x64.AppImage](https://github.com/Rafat-Pantho/video-downloader/releases/download/v3.3.0/video-downloader-linux-x64.AppImage)
 
 **Platform Support:**
 
