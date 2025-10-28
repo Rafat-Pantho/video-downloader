@@ -50,15 +50,15 @@ A modern, beautiful **desktop application** for downloading videos from YouTube,
 
 1. **Install dependencies**
 
-```bash
-npm install
-```
+  ```bash
+  npm install
+  ```
 
 2. **Run the application**
 
-```bash
-npm start
-```
+  ```bash
+  npm start
+  ```
 
 Notes:
 
@@ -284,17 +284,17 @@ Full list: [yt-dlp supported sites](https://github.com/yt-dlp/yt-dlp/blob/master
 
 The app now features **built-in browser login** - no need to install any browser extensions!
 
-### How It Works:
+### How It Works
 
 1. **Try to download** a private or age-restricted video
 2. **App detects** the restriction automatically
-3. **Login prompt** appears - click "Login" 
+3. **Login prompt** appears - click "Login"
 4. **Browser window** opens within the app
 5. **Login normally** to the website (Facebook, YouTube, etc.)
 6. **Close the window** when done - your session is saved!
 7. **Download again** - the video will now download successfully
 
-### Supported Scenarios:
+### Supported Scenarios
 
 - 🔒 Private Facebook group videos
 - 🔞 Age-restricted YouTube videos  
@@ -303,7 +303,7 @@ The app now features **built-in browser login** - no need to install any browser
 - 📱 Instagram private accounts
 - 🐦 Twitter/X protected tweets
 
-### Manual Login:
+### Manual Login
 
 You can also login proactively:
 
@@ -312,7 +312,7 @@ You can also login proactively:
 3. Close the window
 4. Your session is saved for future downloads
 
-### Logout:
+### Logout
 
 Click **"Logout"** to clear all saved cookies and sessions.
 

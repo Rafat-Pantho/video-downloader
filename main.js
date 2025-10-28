@@ -1,13 +1,9 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { exec, spawn } from 'child_process';
-import { promisify } from 'util';
-import fs from 'fs';
-import os from 'os';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { app, BrowserWindow, ipcMain, dialog, session } = require('electron');
+const path = require('path');
+const { exec, spawn } = require('child_process');
+const { promisify } = require('util');
+const fs = require('fs');
+const os = require('os');
 
 const execPromise = promisify(exec);
 
@@ -80,12 +76,12 @@ function createWindow() {
       contextIsolation: false
     },
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#f3e5f5',
     show: false,
     autoHideMenuBar: true
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile('react-index.html');
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -146,8 +142,8 @@ function createLoginWindow(url) {
 // Save cookies from login session to Netscape format
 async function saveCookiesFromSession() {
   try {
-    const session = require('electron').session.fromPartition('persist:login');
-    const cookies = await session.cookies.get({});
+    const loginSession = session.fromPartition('persist:login');
+    const cookies = await loginSession.cookies.get({});
     
     if (cookies.length === 0) {
       return { success: false, message: 'No cookies found' };
@@ -472,6 +468,27 @@ ipcMain.handle('close-login-window', async () => {
   }
 });
 
+ipcMain.handle('load-cookies', async () => {
+  try {
+    if (fs.existsSync(COOKIES_PATH)) {
+      const content = fs.readFileSync(COOKIES_PATH, 'utf-8');
+      return { success: true, content };
+    }
+    return { success: true, content: '' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('save-cookies', async (event, cookiesContent) => {
+  try {
+    fs.writeFileSync(COOKIES_PATH, cookiesContent, 'utf-8');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('check-login-status', async () => {
   try {
     if (fs.existsSync(COOKIES_PATH)) {
@@ -510,8 +527,8 @@ ipcMain.handle('clear-cookies', async () => {
     }
     
     // Clear session cookies
-    const session = require('electron').session.fromPartition('persist:login');
-    await session.clearStorageData({
+    const loginSession = session.fromPartition('persist:login');
+    await loginSession.clearStorageData({
       storages: ['cookies']
     });
     

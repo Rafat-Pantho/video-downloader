@@ -1,0 +1,274 @@
+.cookie-management {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-header h2 {
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.login-status-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--purple-dark);
+  border: 2px solid var(--border);
+  display: inline-block;
+  width: fit-content;
+}
+
+.status-badge.logged-in {
+  background: rgba(102, 187, 106, 0.2);
+  color: #2e7d32;
+  border-color: var(--success);
+}
+
+.domain-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.domain-badge {
+  padding: 4px 12px;
+  background: var(--purple-dark);
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--purple-medium);
+}
+
+.empty-state svg {
+  stroke: var(--purple-light);
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  font-size: 14px !important;
+  color: var(--purple-light) !important;
+}
+
+.cookie-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cookie-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.cookie-item:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateX(4px);
+}
+
+.cookie-item.selected {
+  border-color: var(--purple-dark);
+  background: rgba(156, 39, 176, 0.1);
+}
+
+.cookie-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--purple-dark);
+}
+
+.cookie-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cookie-name {
+  font-weight: 600;
+  color: var(--purple-dark);
+  font-size: 15px;
+}
+
+.cookie-domain {
+  font-size: 13px;
+  color: var(--purple-medium);
+  font-weight: 500;
+}
+
+.cookie-path {
+  font-size: 12px;
+  color: var(--purple-light);
+  font-family: 'Courier New', monospace;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+.btn-icon-edit {
+  color: var(--purple-dark);
+}
+
+.btn-icon-edit:hover {
+  background: var(--purple-light);
+  color: white;
+}
+
+.btn-icon-delete {
+  color: var(--error);
+}
+
+.btn-icon-delete:hover {
+  background: var(--error);
+  color: white;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content h2 {
+  color: var(--purple-dark);
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-actions .btn {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-buttons {
+    width: 100%;
+  }
+
+  .action-buttons .btn {
+    flex: 1;
+  }
+
+  .login-status-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cookie-item {
+    flex-wrap: wrap;
+  }
+
+  .cookie-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
