@@ -1,77 +1,101 @@
 .home-page {
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 2.5rem;
   text-align: center;
 }
 
 .page-header h1 {
-  font-size: 32px;
-  color: var(--purple-dark);
-  margin-bottom: 8px;
-  font-weight: 700;
+  font-size: 2.5rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
 .page-header p {
-  font-size: 16px;
-  color: var(--purple-medium);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
 }
 
 .video-info {
   display: flex;
-  gap: 20px;
+  gap: 1.5rem;
   align-items: flex-start;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: var(--radius-md);
 }
 
 .video-thumbnail {
-  width: 200px;
+  width: 240px;
   height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  object-fit: cover;
+  aspect-ratio: 16/9;
 }
 
 .video-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .detail-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: flex-start;
+  gap: 1rem;
+  align-items: baseline;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-row strong {
-  color: var(--purple-dark);
+  color: var(--text-secondary);
   min-width: 80px;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .detail-row span {
-  color: var(--purple-medium);
+  color: var(--text-primary);
   flex: 1;
+  font-weight: 500;
 }
 
 .path-text {
   word-break: break-all;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: #a5b4fc !important;
 }
 
 .settings-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 1.5rem;
 }
 
 .complete-info {
-  background: rgba(102, 187, 106, 0.1);
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--success);
+  background: rgba(16, 185, 129, 0.05);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  margin-bottom: 1.5rem;
 }
 
 @media (max-width: 768px) {
@@ -85,5 +109,9 @@
 
   .settings-row {
     grid-template-columns: 1fr;
+  }
+  
+  .page-header h1 {
+    font-size: 2rem;
   }
 }

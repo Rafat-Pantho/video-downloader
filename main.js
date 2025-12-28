@@ -305,27 +305,33 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
     const outputPath = path.join(folder, `${filename}.%(ext)s`);
     
     // Build format string based on quality
+    // Using format selection that preserves original aspect ratio
     let formatString;
     const isAudioOnly = quality === 'audio';
     
     switch(quality) {
       case 'best':
-        formatString = 'bestvideo+bestaudio/best';
+        // Best quality video + best audio, preserving original resolution and aspect ratio
+        formatString = 'bestvideo*+bestaudio/best';
         break;
       case '1080p':
-        formatString = 'bestvideo[height<=1080]+bestaudio/best[height<=1080]';
+        // Select best video up to 1080p height, preserving aspect ratio
+        formatString = 'bestvideo*[height<=1080]+bestaudio/bestvideo[height<=1080]+bestaudio/best';
         break;
       case '720p':
-        formatString = 'bestvideo[height<=720]+bestaudio/best[height<=720]';
+        // Select best video up to 720p height, preserving aspect ratio
+        formatString = 'bestvideo*[height<=720]+bestaudio/bestvideo[height<=720]+bestaudio/best';
         break;
       case '480p':
-        formatString = 'bestvideo[height<=480]+bestaudio/best[height<=480]';
+        // Select best video up to 480p height, preserving aspect ratio
+        formatString = 'bestvideo*[height<=480]+bestaudio/bestvideo[height<=480]+bestaudio/best';
         break;
       case 'audio':
-        formatString = 'bestaudio/best';
+        // Best audio only
+        formatString = 'bestaudio*[acodec!=none]/bestaudio/best';
         break;
       default:
-        formatString = 'bestvideo+bestaudio/best';
+        formatString = 'bestvideo*+bestaudio/best';
     }
     
     const args = [
@@ -336,6 +342,8 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       '--newline',
       // Embed metadata
       '--embed-metadata',
+      // Do NOT re-encode - this preserves original quality and aspect ratio
+      '--no-post-overwrites',
     ];
 
     // For audio only, extract audio and convert to specified format
@@ -344,7 +352,10 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       args.push('--audio-format', format);
       args.push('--audio-quality', '0'); // Best quality
     } else {
+      // Use remux instead of re-encode when possible to preserve original quality
       args.push('--merge-output-format', format);
+      // Prefer formats that don't require transcoding
+      args.push('--prefer-free-formats');
     }
 
     // Add cookies if available

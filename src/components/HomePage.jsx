@@ -135,27 +135,60 @@ function HomePage() {
       )}
 
       <div className="card">
-        <h2>Video URL</h2>
-        <div className="input-group">
-          <input
-            type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleFetchInfo()}
-          />
-        </div>
-        <button className="btn btn-primary" onClick={handleFetchInfo}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
-          Fetch Info
+          Video URL
+        </h2>
+        <div className="input-group">
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="url"
+              placeholder="Paste video URL here (YouTube, Facebook, etc.)"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleFetchInfo()}
+              style={{ flex: 1 }}
+            />
+            <button 
+              className="btn btn-secondary"
+              onClick={async () => {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  setUrl(text);
+                } catch (err) {
+                  showStatus('Failed to read clipboard', 'error');
+                }
+              }}
+              title="Paste from clipboard"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button className="btn btn-primary" onClick={handleFetchInfo} style={{ width: '100%' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Fetch Video Info
         </button>
       </div>
 
       {videoInfo && (
         <div className="card fade-in">
-          <h2>Video Information</h2>
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7"></polygon>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+            Video Information
+          </h2>
           <div className="video-info">
             {videoInfo.thumbnail && (
               <img src={videoInfo.thumbnail} alt="Thumbnail" className="video-thumbnail" />
@@ -176,7 +209,14 @@ function HomePage() {
 
       {!completed && videoInfo && (
         <div className="card fade-in">
-          <h2>Download Settings</h2>
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download Settings
+          </h2>
           
           <div className="input-group">
             <label>Save Location</label>
@@ -187,8 +227,10 @@ function HomePage() {
                 readOnly
                 style={{ flex: 1 }}
               />
-              <button className="btn btn-secondary" onClick={handleSelectFolder}>
-                Browse
+              <button className="btn btn-secondary" onClick={handleSelectFolder} title="Browse folder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
               </button>
             </div>
           </div>
@@ -227,10 +269,10 @@ function HomePage() {
             <div className="input-group">
               <label>Quality</label>
               <select value={quality} onChange={(e) => setQuality(e.target.value)}>
-                <option value="best">Best Available</option>
-                <option value="1080p">1080p Full HD</option>
-                <option value="720p">720p HD</option>
-                <option value="480p">480p SD</option>
+                <option value="best">Best (Original Quality)</option>
+                <option value="1080p">1080p (Max Full HD)</option>
+                <option value="720p">720p (Max HD)</option>
+                <option value="480p">480p (Max SD)</option>
                 <option value="audio">Audio Only</option>
               </select>
             </div>
@@ -249,7 +291,19 @@ function HomePage() {
 
       {downloading && (
         <div className="card fade-in">
-          <h2>Download Progress</h2>
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spin">
+              <line x1="12" y1="2" x2="12" y2="6"></line>
+              <line x1="12" y1="18" x2="12" y2="22"></line>
+              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+              <line x1="2" y1="12" x2="6" y2="12"></line>
+              <line x1="18" y1="12" x2="22" y2="12"></line>
+              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+              <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+            </svg>
+            Download Progress
+          </h2>
           <div className="progress-container">
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${progress}%` }}>
@@ -262,7 +316,13 @@ function HomePage() {
 
       {completed && (
         <div className="card fade-in">
-          <h2>Download Complete</h2>
+          <h2>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--success)' }}>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Download Complete
+          </h2>
           <div className="complete-info">
             <div className="detail-row">
               <strong>Saved to:</strong>
@@ -274,10 +334,17 @@ function HomePage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-            <button className="btn btn-primary" onClick={handleOpenFolder}>
+            <button className="btn btn-primary" onClick={handleOpenFolder} style={{ flex: 1 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
               Open Folder
             </button>
-            <button className="btn btn-secondary" onClick={handleReset}>
+            <button className="btn btn-secondary" onClick={handleReset} style={{ flex: 1 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
               Download Another
             </button>
           </div>
