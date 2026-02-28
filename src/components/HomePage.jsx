@@ -9,7 +9,8 @@ function HomePage() {
   const [filename, setFilename] = useState('');
   const [format, setFormat] = useState('mp4');
   const [audioFormat, setAudioFormat] = useState('mp3');
-  const [quality, setQuality] = useState('best');
+  const [quality, setQuality] = useState('');
+  const [availableQualities, setAvailableQualities] = useState([]);
   const [status, setStatus] = useState({ message: '', type: '' });
   const [videoInfo, setVideoInfo] = useState(null);
   const [downloading, setDownloading] = useState(false);
@@ -51,6 +52,20 @@ function HomePage() {
     if (result.success) {
       setVideoInfo(result);
       setFilename(result.title);
+
+      // Qualities are included in the same response
+      if (result.qualities && result.qualities.length > 0) {
+        setAvailableQualities(result.qualities);
+        setQuality(result.qualities[0].value);
+      } else {
+        // Fallback: show all tiers if detection fails
+        setAvailableQualities([
+          { value: '1080p', label: '1080p (Full HD) (Best Quality)', isBest: true },
+          { value: '720p', label: '720p (HD)' },
+          { value: '480p', label: '480p (SD)' },
+        ]);
+        setQuality('1080p');
+      }
       showStatus('Video information loaded successfully', 'success');
     } else {
       showStatus(result.error || 'Failed to fetch video info', 'error');
@@ -114,6 +129,8 @@ function HomePage() {
     setUrl('');
     setVideoInfo(null);
     setFilename('');
+    setQuality('');
+    setAvailableQualities([]);
     setCompleted(false);
     setProgress(0);
     setDownloadedPath('');
@@ -269,10 +286,9 @@ function HomePage() {
             <div className="input-group">
               <label>Quality</label>
               <select value={quality} onChange={(e) => setQuality(e.target.value)}>
-                <option value="best">Best (Original Quality)</option>
-                <option value="1080p">1080p (Max Full HD)</option>
-                <option value="720p">720p (Max HD)</option>
-                <option value="480p">480p (Max SD)</option>
+                {availableQualities.map((q) => (
+                  <option key={q.value} value={q.value}>{q.label}</option>
+                ))}
                 <option value="audio">Audio Only</option>
               </select>
             </div>

@@ -11,7 +11,7 @@ function Navigation({ currentPage, setCurrentPage, visible, toggleNav }) {
           <path d="M2 12L12 17L22 12" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         <h1>Video Downloader</h1>
-        <span className="version">v1.0.0</span>
+        <span className="version">v1.0.1</span>
       </div>
 
       <div className="nav-items">

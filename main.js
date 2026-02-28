@@ -191,6 +191,47 @@ app.on('activate', () => {
 
 // IPC Handlers
 
+const https = require('https');
+
+// Check for app updates from GitHub releases
+ipcMain.handle('check-for-update', async () => {
+  try {
+    const currentVersion = require('./package.json').version;
+    const data = await new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'api.github.com',
+        path: '/repos/Rafat-Pantho/video-downloader/releases/latest',
+        headers: { 'User-Agent': 'video-downloader-app' }
+      };
+      https.get(options, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            resolve(JSON.parse(body));
+          } else {
+            reject(new Error(`GitHub API returned ${res.statusCode}`));
+          }
+        });
+      }).on('error', reject);
+    });
+
+    const latestVersion = (data.tag_name || '').replace(/^v/, '');
+    const isNewer = latestVersion && latestVersion !== currentVersion &&
+      latestVersion.localeCompare(currentVersion, undefined, { numeric: true }) > 0;
+
+    return {
+      updateAvailable: isNewer,
+      currentVersion,
+      latestVersion,
+      releaseUrl: data.html_url || `https://github.com/Rafat-Pantho/video-downloader/releases/latest`
+    };
+  } catch (error) {
+    // Silently fail — don't block the user if the check fails
+    return { updateAvailable: false, error: error.message };
+  }
+});
+
 // Check yt-dlp installation
 ipcMain.handle('check-ytdlp', async () => {
   try {
@@ -210,20 +251,17 @@ ipcMain.handle('install-ytdlp', async () => {
   return { success: false, error: 'Bundled yt-dlp not found' };
 });
 
-// Get video info
+// Get video info and available qualities in a single call
 ipcMain.handle('get-video-info', async (event, url) => {
   try {
-    // Use spawn instead of exec to handle stderr warnings properly
     const result = await new Promise((resolve, reject) => {
       const args = [
-        '--no-playlist',  // Only get info for single video, not entire playlist
-        '--no-warnings',  // Reduce noise from warnings
-        '--get-title', 
-        '--get-duration', 
-        '--get-thumbnail'
+        '--no-playlist',
+        '--no-warnings',
+        '--no-download',
+        '-j'
       ];
       
-      // Add cookies if available
       if (fs.existsSync(COOKIES_PATH)) {
         args.push('--cookies', COOKIES_PATH);
       }
@@ -231,7 +269,7 @@ ipcMain.handle('get-video-info', async (event, url) => {
       args.push(url);
       
       const childProcess = spawn(YTDLP_PATH, args, {
-        timeout: 60000,  // Increased to 60 seconds for slower platforms
+        timeout: 60000,
         env: { ...process.env, PATH: `${FFMPEG_DIR};${process.env.PATH}` }
       });
       
@@ -247,10 +285,7 @@ ipcMain.handle('get-video-info', async (event, url) => {
       });
       
       childProcess.on('close', (code) => {
-        // YouTube warnings are sent to stderr but don't indicate failure
-        // Only reject if exit code is non-zero AND we got no stdout
         if (code !== 0 && !stdout.trim()) {
-          // Provide better error messages based on the error content
           let errorMsg = stderr || `Process exited with code ${code}`;
           if (stderr.includes('Cannot parse data')) {
             errorMsg = 'Unable to extract video info. The platform may require login or the link may be invalid.';
@@ -270,18 +305,62 @@ ipcMain.handle('get-video-info', async (event, url) => {
       childProcess.on('error', reject);
     });
     
-    const lines = result.stdout.trim().split('\n');
+    const info = JSON.parse(result.stdout);
+
+    // Format duration from seconds to MM:SS or HH:MM:SS
+    let duration = 'Unknown';
+    if (info.duration) {
+      const totalSecs = Math.floor(info.duration);
+      const hrs = Math.floor(totalSecs / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+      duration = hrs > 0
+        ? `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+        : `${mins}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Extract available quality tiers from the same JSON
+    const formats = info.formats || [];
+    const heights = new Set();
+    for (const fmt of formats) {
+      if (fmt.height && fmt.vcodec && fmt.vcodec !== 'none') {
+        heights.add(fmt.height);
+      }
+    }
+
+    const qualityTiers = [
+      { value: '4k', label: '4K (2160p)', minHeight: 2160 },
+      { value: '2k', label: '2K (1440p)', minHeight: 1440 },
+      { value: '1080p', label: '1080p (Full HD)', minHeight: 1080 },
+      { value: '720p', label: '720p (HD)', minHeight: 720 },
+      { value: '480p', label: '480p (SD)', minHeight: 480 },
+      { value: '360p', label: '360p', minHeight: 360 },
+      { value: '240p', label: '240p', minHeight: 240 },
+      { value: '144p', label: '144p', minHeight: 144 },
+    ];
+
+    const qualities = qualityTiers.filter(tier =>
+      [...heights].some(h => h >= tier.minHeight)
+    );
+
+    if (qualities.length > 0) {
+      qualities[0].label += ' (Best Quality)';
+      qualities[0].isBest = true;
+    }
+
     return {
       success: true,
-      title: lines[0]?.replace(/[<>:"/\\|?*]/g, '_').substring(0, 100) || 'video',
-      duration: lines[1] || 'Unknown',
-      thumbnail: lines[2] || null
+      title: (info.title || 'video').replace(/[<>:"/\\|?*]/g, '_').substring(0, 100),
+      duration: duration,
+      thumbnail: info.thumbnail || null,
+      qualities: qualities
     };
   } catch (error) {
     return {
       success: false,
       title: generateRandomName(),
-      error: error.message
+      error: error.message,
+      qualities: []
     };
   }
 });
@@ -314,6 +393,14 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
         // Best quality video + best audio, preserving original resolution and aspect ratio
         formatString = 'bestvideo*+bestaudio/best';
         break;
+      case '4k':
+        // Select best video up to 4K (2160p) height
+        formatString = 'bestvideo*[height<=2160]+bestaudio/bestvideo[height<=2160]+bestaudio/best';
+        break;
+      case '2k':
+        // Select best video up to 2K (1440p) height
+        formatString = 'bestvideo*[height<=1440]+bestaudio/bestvideo[height<=1440]+bestaudio/best';
+        break;
       case '1080p':
         // Select best video up to 1080p height, preserving aspect ratio
         formatString = 'bestvideo*[height<=1080]+bestaudio/bestvideo[height<=1080]+bestaudio/best';
@@ -325,6 +412,15 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       case '480p':
         // Select best video up to 480p height, preserving aspect ratio
         formatString = 'bestvideo*[height<=480]+bestaudio/bestvideo[height<=480]+bestaudio/best';
+        break;
+      case '360p':
+        formatString = 'bestvideo*[height<=360]+bestaudio/bestvideo[height<=360]+bestaudio/best';
+        break;
+      case '240p':
+        formatString = 'bestvideo*[height<=240]+bestaudio/bestvideo[height<=240]+bestaudio/best';
+        break;
+      case '144p':
+        formatString = 'bestvideo*[height<=144]+bestaudio/bestvideo[height<=144]+bestaudio/best';
         break;
       case 'audio':
         // Best audio only
@@ -353,7 +449,7 @@ ipcMain.handle('download-video', async (event, { url, folder, filename, format, 
       args.push('--audio-quality', '0'); // Best quality
     } else {
       // Use remux instead of re-encode when possible to preserve original quality
-      args.push('--merge-output-format', format);
+      args.push('--merge-output-format', `${format}/mkv`); // Use MKV as fallback container for remuxing if original format isn't supported by the extension
       // Prefer formats that don't require transcoding
       args.push('--prefer-free-formats');
     }

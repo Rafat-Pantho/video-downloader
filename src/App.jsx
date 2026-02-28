@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navigation from './components/Navigation';
 import HomePage from './components/HomePage';
 import CookieManagement from './components/CookieManagement';
+import UpdateNotification from './components/UpdateNotification';
 import './App.css';
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <UpdateNotification />
       <Navigation 
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
