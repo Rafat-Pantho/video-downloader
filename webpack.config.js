@@ -1,4 +1,5 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -6,8 +7,10 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
+    clean: true,
   },
-  target: 'electron-renderer',
+  // Tauri serves the built assets as a plain web app (no Node integration).
+  target: 'web',
   module: {
     rules: [
       {
@@ -29,8 +32,11 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx']
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      inject: 'body',
+    })
+  ],
   devtool: 'source-map',
-  externals: {
-    electron: 'commonjs electron'
-  }
 };

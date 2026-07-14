@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import './UpdateNotification.css';
-
-const { ipcRenderer, shell } = window.require('electron');
 
 function UpdateNotification() {
   const [update, setUpdate] = useState(null);
@@ -10,7 +9,7 @@ function UpdateNotification() {
 
   useEffect(() => {
     // Check for updates on mount
-    ipcRenderer.invoke('check-for-update').then((result) => {
+    invoke('check_for_update').then((result) => {
       if (result && result.updateAvailable) {
         setUpdate(result);
         setVisible(true);
@@ -35,7 +34,7 @@ function UpdateNotification() {
 
   const handleClick = () => {
     if (update && update.releaseUrl) {
-      shell.openExternal(update.releaseUrl);
+      invoke('open_external', { url: update.releaseUrl });
     }
     dismiss();
   };

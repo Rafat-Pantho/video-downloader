@@ -1,29 +1,30 @@
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
+import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { Extract } from 'unzipper';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const FFMPEG_URL = 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip';
 const binDir = path.join(__dirname, 'bin');
-const FFMPEG_EXE = path.join(binDir, 'ffmpeg.exe');
-const FFPROBE_EXE = path.join(binDir, 'ffprobe.exe');
+const isWin = process.platform === 'win32';
+const FFMPEG_EXE = path.join(binDir, isWin ? 'ffmpeg.exe' : 'ffmpeg');
+const FFPROBE_EXE = path.join(binDir, isWin ? 'ffprobe.exe' : 'ffprobe');
 
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
-    
+
     https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (response) => {
       // Handle all redirect status codes
-      if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 303 || response.statusCode === 307 || response.statusCode === 308) {
+      if ([301, 302, 303, 307, 308].includes(response.statusCode)) {
         file.close();
         fs.unlinkSync(dest);
         return downloadFile(response.headers.location, dest).then(resolve).catch(reject);
       }
-      
+
       if (response.statusCode !== 200) {
         file.close();
         fs.unlinkSync(dest);
@@ -58,51 +59,130 @@ function downloadFile(url, dest) {
   });
 }
 
-async function extractFFmpeg(zipPath) {
+function extractZip(zipPath, destDir) {
   return new Promise((resolve, reject) => {
-    console.log('Extracting ffmpeg...');
-    
     fs.createReadStream(zipPath)
-      .pipe(Extract({ path: binDir }))
-      .on('close', () => {
-        // Find the extracted folder
-        const items = fs.readdirSync(binDir);
-        const ffmpegFolder = items.find(item => item.startsWith('ffmpeg-') && fs.statSync(path.join(binDir, item)).isDirectory());
-        
-        if (ffmpegFolder) {
-          const ffmpegBinPath = path.join(binDir, ffmpegFolder, 'bin');
-          
-          // Move ffmpeg.exe and ffprobe.exe to bin root
-          const files = ['ffmpeg.exe', 'ffprobe.exe'];
-          for (const file of files) {
-            const src = path.join(ffmpegBinPath, file);
-            const dest = path.join(binDir, file);
-            if (fs.existsSync(src)) {
-              fs.renameSync(src, dest);
-            }
-          }
-          
-          // Clean up extracted folder
-          fs.rmSync(path.join(binDir, ffmpegFolder), { recursive: true, force: true });
-        }
-        
-        // Remove zip file
-        fs.unlinkSync(zipPath);
-        
-        console.log('✓ FFmpeg extracted successfully');
-        resolve();
-      })
+      .pipe(Extract({ path: destDir }))
+      .on('close', resolve)
       .on('error', reject);
   });
 }
 
-async function downloadFFmpeg() {
+function extractTarXz(tarPath, destDir) {
+  return new Promise((resolve, reject) => {
+    const tar = spawn('tar', ['-xJf', tarPath, '-C', destDir]);
+    tar.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`tar exited with code ${code}`));
+    });
+    tar.on('error', reject);
+  });
+}
+
+async function setupWindows() {
   const zipPath = path.join(binDir, 'ffmpeg.zip');
-  
-  console.log('Downloading FFmpeg (this may take a few minutes)...');
+  console.log('Downloading FFmpeg for Windows...');
+  await downloadFile('https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip', zipPath);
+
+  console.log('Extracting ffmpeg...');
+  await extractZip(zipPath, binDir);
+
+  const items = fs.readdirSync(binDir);
+  const ffmpegFolder = items.find(item =>
+    item.startsWith('ffmpeg-') && fs.statSync(path.join(binDir, item)).isDirectory()
+  );
+
+  if (ffmpegFolder) {
+    const ffmpegBinPath = path.join(binDir, ffmpegFolder, 'bin');
+    for (const file of ['ffmpeg.exe', 'ffprobe.exe']) {
+      const src = path.join(ffmpegBinPath, file);
+      const dest = path.join(binDir, file);
+      if (fs.existsSync(src)) {
+        fs.renameSync(src, dest);
+      }
+    }
+    fs.rmSync(path.join(binDir, ffmpegFolder), { recursive: true, force: true });
+  }
+
+  fs.unlinkSync(zipPath);
+}
+
+async function setupMac() {
+  console.log('Downloading FFmpeg for macOS...');
+  for (const name of ['ffmpeg', 'ffprobe']) {
+    const zipPath = path.join(binDir, `${name}.zip`);
+    await downloadFile(`https://evermeet.cx/ffmpeg/getrelease/${name}/zip`, zipPath);
+
+    console.log(`Extracting ${name}...`);
+    await extractZip(zipPath, binDir);
+    fs.unlinkSync(zipPath);
+
+    const dest = path.join(binDir, name);
+    if (fs.existsSync(dest)) {
+      fs.chmodSync(dest, 0o755);
+    }
+  }
+}
+
+async function setupLinux() {
+  const archMap = { x64: 'amd64', arm64: 'arm64' };
+  const arch = archMap[process.arch];
+
+  if (!arch) {
+    console.log(`Unsupported Linux architecture: ${process.arch}. Skipping FFmpeg download - install it via your system package manager.`);
+    return;
+  }
+
+  console.log(`Downloading FFmpeg for Linux (${arch})...`);
+  const tarPath = path.join(binDir, 'ffmpeg.tar.xz');
+  await downloadFile(`https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${arch}-static.tar.xz`, tarPath);
+
+  console.log('Extracting ffmpeg...');
+  await extractTarXz(tarPath, binDir);
+
+  const items = fs.readdirSync(binDir);
+  const ffmpegFolder = items.find(item =>
+    item.startsWith('ffmpeg-') && item.endsWith('-static') && fs.statSync(path.join(binDir, item)).isDirectory()
+  );
+
+  if (ffmpegFolder) {
+    const extractedDir = path.join(binDir, ffmpegFolder);
+    for (const file of ['ffmpeg', 'ffprobe']) {
+      const src = path.join(extractedDir, file);
+      const dest = path.join(binDir, file);
+      if (fs.existsSync(src)) {
+        fs.renameSync(src, dest);
+        fs.chmodSync(dest, 0o755);
+      }
+    }
+    fs.rmSync(extractedDir, { recursive: true, force: true });
+  }
+
+  fs.unlinkSync(tarPath);
+}
+
+async function main() {
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir, { recursive: true });
+  }
+
+  if (fs.existsSync(FFMPEG_EXE) && fs.existsSync(FFPROBE_EXE)) {
+    console.log('✓ FFmpeg already exists');
+    return;
+  }
+
   try {
-    await downloadFile(FFMPEG_URL, zipPath);
-    await extractFFmpeg(zipPath);
+    if (process.platform === 'win32') {
+      await setupWindows();
+    } else if (process.platform === 'darwin') {
+      await setupMac();
+    } else if (process.platform === 'linux') {
+      await setupLinux();
+    } else {
+      console.log(`FFmpeg auto-download is not supported on ${process.platform}. Please install ffmpeg manually.`);
+      return;
+    }
+    console.log('✓ FFmpeg extracted successfully');
   } catch (error) {
     console.error('Failed to download/extract FFmpeg:', error.message);
     // Not critical - yt-dlp can work without ffmpeg for some videos
@@ -110,29 +190,8 @@ async function downloadFFmpeg() {
   }
 }
 
-async function main() {
-  // Create bin directory if it doesn't exist
-  if (!fs.existsSync(binDir)) {
-    fs.mkdirSync(binDir, { recursive: true });
-  }
-
-  // Check if ffmpeg already exists
-  if (fs.existsSync(FFMPEG_EXE) && fs.existsSync(FFPROBE_EXE)) {
-    console.log('✓ FFmpeg already exists');
-    return;
-  }
-
-  await downloadFFmpeg();
-}
-
-// Only run if we're on Windows and ffmpeg doesn't exist
-if (process.platform === 'win32') {
-  main().catch((err) => {
-    console.error('FFmpeg download error:', err.message);
-    console.log('Continuing without FFmpeg - some features may be limited');
-    // Don't exit with error - make it non-fatal
-  });
-} else {
-  console.log('FFmpeg auto-download is only supported on Windows');
-  console.log('On Linux/macOS, FFmpeg will be installed via CI package managers or system packages');
-}
+main().catch((err) => {
+  console.error('FFmpeg download error:', err.message);
+  console.log('Continuing without FFmpeg - some features may be limited');
+  // Don't exit with error - make it non-fatal
+});

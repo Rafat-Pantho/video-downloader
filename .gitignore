@@ -1,8 +1,15 @@
 # Dependencies
 node_modules/
 
-# Bundled yt-dlp executable (downloaded during postinstall)
+# Bundled yt-dlp/ffmpeg binaries (downloaded during postinstall by
+# download-ytdlp.js / download-ffmpeg.js — see those scripts for sources)
 bin/
+yt-dlp
+yt-dlp.exe
+ffmpeg
+ffmpeg.exe
+ffprobe
+ffprobe.exe
 
 # Downloaded videos
 *.mp4
@@ -10,6 +17,10 @@ bin/
 *.mkv
 *.mov
 *.webm
+
+# Locally captured login cookies (Netscape cookies.txt) — never commit auth data
+cookies.txt
+cookies/
 
 # Logs
 *.log
@@ -28,18 +39,29 @@ Thumbs.db
 # Environment variables
 .env
 
-# Build outputs (do not commit installers or unpacked apps)
+# Frontend build output
 dist/
+
+# Tauri / Rust build output
+src-tauri/target/
+src-tauri/gen/
+
+# Legacy Electron build output (no longer produced, kept in case of stray artifacts)
 build/
 out/
 release/
 
-# Electron artifacts
+# Installers / packaged artifacts (Tauri bundler output: nsis, deb, rpm, appimage, dmg, app)
 *.exe
 *.msi
 *.blockmap
 *.7z
 *.zip
+*.deb
+*.rpm
+*.AppImage
+*.dmg
+*.app
 
 # Coverage / test
 coverage/

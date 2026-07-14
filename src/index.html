@@ -3,14 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video Downloader v1.0.1</title>
+  <title>Video Downloader</title>
+  <!-- Apply the saved theme before first paint so there's no light/dark flash. -->
+  <script>
+    try {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  </script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -19,23 +27,28 @@
       -moz-osx-font-smoothing: grayscale;
       overflow: hidden;
     }
-    
+
     #root {
       width: 100%;
       height: 100vh;
     }
-    
-    /* Loading state */
+
+    /* Loading state shown until the React bundle mounts */
     #loading {
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background: #0f172a;
-      color: #f8fafc;
+      background: linear-gradient(160deg, #eef2ff 0%, #f8fafc 45%, #eff6ff 100%);
+      color: #4f46e5;
       font-size: 24px;
-      font-weight: 600;
+      font-weight: 700;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    :root[data-theme="dark"] #loading {
+      background: linear-gradient(160deg, #0b1120 0%, #0f172a 45%, #0b1224 100%);
+      color: #818cf8;
     }
   </style>
 </head>
@@ -43,22 +56,6 @@
   <div id="root">
     <div id="loading">Loading Video Downloader...</div>
   </div>
-  <script>
-    // Load the bundled React app
-    const script = document.createElement('script');
-    script.src = './dist/bundle.js';
-    script.onerror = (error) => {
-      console.error('Failed to load bundle.js:', error);
-      document.getElementById('loading').innerHTML = 'Failed to load application. Please check console.';
-    };
-    script.onload = () => {
-      console.log('Bundle loaded successfully');
-      const loading = document.getElementById('loading');
-      if (loading) {
-        loading.remove();
-      }
-    };
-    document.body.appendChild(script);
-  </script>
+  <!-- html-webpack-plugin injects the bundled <script> here -->
 </body>
 </html>

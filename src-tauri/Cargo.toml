@@ -1,0 +1,29 @@
+[package]
+name = "video-downloader"
+version = "2.0.0"
+description = "Modern video downloader with GUI using yt-dlp"
+authors = ["Rafat Abdullah Pantho"]
+license = "ISC"
+repository = "https://github.com/Rafat-Pantho/video-downloader"
+edition = "2021"
+rust-version = "1.77.2"
+
+# The application entry point and all Tauri commands live in src/main.rs.
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "blocking"] }
+zip = { version = "8", default-features = false, features = ["deflate"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

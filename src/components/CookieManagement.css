@@ -26,16 +26,93 @@
 .login-status-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
 .status-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
+  min-width: 220px;
+}
+
+/* --- Quick-access login buttons: distinct, premium per-site treatment --- */
+.quick-login-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.quick-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card-solid);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.quick-login-btn:hover:not(:disabled) {
+  border-color: var(--site-color, var(--primary));
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -8px color-mix(in srgb, var(--site-color, var(--primary)) 45%, transparent);
+}
+
+.quick-login-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.quick-login-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.quick-login-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--site-color, var(--primary)) 14%, white);
+  color: var(--site-color, var(--primary));
+}
+
+.quick-login-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-login {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.custom-login label {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.custom-login .login-hint {
+  margin: 0 0 10px;
 }
 
 .status-badge {
@@ -43,7 +120,7 @@
   background: var(--secondary-bg);
   border-radius: var(--radius-md);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--text-secondary);
   border: 1px solid var(--border);
   display: inline-block;
@@ -51,9 +128,9 @@
 }
 
 .status-badge.logged-in {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--success-light);
-  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+  border-color: rgba(5, 150, 105, 0.25);
 }
 
 .domain-badges {
@@ -68,7 +145,18 @@
   color: white;
   border-radius: var(--radius-sm);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .empty-state {
@@ -84,7 +172,7 @@
 
 .empty-state p {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
   margin-bottom: 8px;
   color: var(--text-primary);
 }
@@ -92,6 +180,7 @@
 .empty-subtitle {
   font-size: 14px !important;
   color: var(--text-muted) !important;
+  font-weight: 500 !important;
 }
 
 .cookie-list {
@@ -108,18 +197,19 @@
   background: var(--bg-input);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
 }
 
 .cookie-item:hover {
-  background: var(--secondary-bg);
+  background: var(--bg-card-solid);
   border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
   transform: translateX(4px);
 }
 
 .cookie-item.selected {
   border-color: var(--primary);
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--secondary-bg);
 }
 
 .cookie-checkbox {
@@ -131,13 +221,14 @@
 
 .cookie-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .cookie-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   font-size: 15px;
 }
@@ -145,7 +236,7 @@
 .cookie-domain {
   font-size: 13px;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .cookie-path {
@@ -162,24 +253,24 @@
 .btn-icon {
   width: 36px;
   height: 36px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  background: var(--secondary-bg);
+  transition: all var(--transition-base);
+  background: var(--bg-card-solid);
   color: var(--text-secondary);
 }
 
 .btn-icon:hover {
-  transform: scale(1.1);
-  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-icon-edit {
-  color: var(--primary-light);
+  color: var(--primary);
 }
 
 .btn-icon-edit:hover {
@@ -189,7 +280,7 @@
 }
 
 .btn-icon-delete {
-  color: var(--error-light);
+  color: var(--error);
 }
 
 .btn-icon-delete:hover {
@@ -198,60 +289,18 @@
   color: white;
 }
 
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+/* Login-flow follow-up actions, shown once a login window is open */
+.login-followup {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.modal-content {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 32px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-content h2 {
-  color: var(--text-primary);
-  margin-bottom: 20px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.modal-actions .btn {
-  flex: 1;
+.login-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
 }
 
 @media (max-width: 768px) {
@@ -273,6 +322,11 @@
     align-items: stretch;
   }
 
+  .quick-login-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
   .cookie-item {
     flex-wrap: wrap;
   }
@@ -280,5 +334,13 @@
   .cookie-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .login-followup {
+    width: 100%;
+  }
+
+  .login-followup .btn {
+    flex: 1;
   }
 }

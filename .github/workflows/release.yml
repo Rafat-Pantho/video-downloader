@@ -10,19 +10,31 @@ permissions:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    env:
-      CSC_IDENTITY_AUTO_DISCOVERY: false
-      ELECTRON_BUILDER_CACHE: "${{ github.workspace }}/.cache/electron-builder"
+    name: Build on ${{ matrix.platform }}
+    runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        platform: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Tauri's Linux bundler (deb/rpm/appimage) needs the WebKitGTK stack.
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            librsvg2-dev \
+            libayatana-appindicator3-dev \
+            libssl-dev \
+            build-essential \
+            patchelf \
+            rpm
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,121 +42,26 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      # Installs the JS deps and, via postinstall, downloads the correct
+      # yt-dlp/ffmpeg binaries for this OS so they can be bundled as resources.
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Linux packaging deps
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            xz-utils \
-            fakeroot \
-            dpkg \
-            desktop-file-utils \
-            icnsutils \
-            graphicsmagick
-
-      - name: Build React bundle with Webpack
-        run: npm run webpack
-
-      - name: Build (Windows)
-        if: matrix.os == 'windows-latest'
-        run: npx electron-builder --win --publish=never
-
-      - name: Build (macOS)
-        if: matrix.os == 'macos-latest'
-        run: npx electron-builder --mac --publish=never
-
-      - name: Build (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: npx electron-builder --linux --publish=never
-
-      - name: List build outputs (Unix)
-        if: matrix.os != 'windows-latest'
-        shell: bash
-        run: |
-          echo "OS ${{ matrix.os }} contents of release:"
-          ls -la release || true
-
-      - name: List build outputs (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          Write-Host "OS windows-latest contents of release:"
-          if (Test-Path release) { Get-ChildItem -Recurse release | Format-Table FullName,Length -Auto }
-
-      - name: Prepare release notes from CHANGELOG
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-          FILE=CHANGELOG.md
-          OUT=release-notes.md
-          if [ -f "$FILE" ]; then
-            # Extract section starting at '## [TAG]' or '## TAG' up to next '## '
-            awk -v tag="$TAG" '/^## /{p=0} $0 ~ "^## \\[[vV]" tag "\\]" || $0 ~ "^## " tag {p=1} p{print}' "$FILE" | sed -n '1,/^## /p' | sed '$d' > "$OUT" || true
-            # Fallback: try without trimming
-            if [ ! -s "$OUT" ]; then
-              awk -v tag="$TAG" '$0 ~ "^## \\[[vV]" tag "\\]" || $0 ~ "^## " tag, /^## /{print}' "$FILE" | sed '$d' > "$OUT" || true
-            fi
-            # If still empty, use entire file
-            if [ ! -s "$OUT" ]; then cp "$FILE" "$OUT"; fi
-          else
-            echo "Release $TAG" > "$OUT"
-          fi
-          echo "RELEASE_NOTES=$OUT" >> $GITHUB_ENV
-
-      - name: Upload build outputs as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ matrix.os }}
-          if-no-files-found: ignore
-          path: |
-            release/*.exe
-            release/*.blockmap
-            release/*.dmg
-            release/*.zip
-            release/*.AppImage
-            release/*.deb
-
-  publish:
-    name: Create GitHub Release and upload assets
-    runs-on: ubuntu-latest
-    needs: build
-    env:
-      CSC_IDENTITY_AUTO_DISCOVERY: false
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Purge step removed - keep all releases for version history
-      # Users can manually delete old releases if needed
-
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: List downloaded artifacts
-        shell: bash
-        run: |
-          echo "=== Contents of artifacts directory ==="
-          ls -R artifacts/
-          echo "=== Finding all files to upload ==="
-          find artifacts -type f
-
-      - name: Create/Update GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Video Downloader ${{ github.ref_name }}
-          files: |
-            artifacts/**/*.exe
-            artifacts/**/*.dmg
-            artifacts/**/*.zip
-            artifacts/**/*.AppImage
-            artifacts/**/*.deb
-            artifacts/**/*.blockmap
-          fail_on_unmatched_files: false
+      - name: Build and release Tauri app
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Video Downloader ${{ github.ref_name }}'
+          releaseBody: 'See the assets below to download and install this version.'
+          releaseDraft: false
+          prerelease: false
