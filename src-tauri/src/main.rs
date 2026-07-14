@@ -119,6 +119,20 @@ fn configured_command(program: &Path) -> Command {
     cmd
 }
 
+/// Render a fully-built `Command` (program + all args) as a single, printable
+/// line for debug logging. Reads back what was configured via `get_program` /
+/// `get_args`, so it reflects the *exact* invocation about to run — including the
+/// `--impersonate`, `--cookies`, and format flags — without us having to
+/// re-thread every arg by hand. Used by the failure logging in `get_video_info`
+/// and `run_download`.
+fn format_command(cmd: &Command) -> String {
+    let mut parts = vec![cmd.get_program().to_string_lossy().into_owned()];
+    for arg in cmd.get_args() {
+        parts.push(arg.to_string_lossy().into_owned());
+    }
+    parts.join(" ")
+}
+
 /// Prepend a directory to the child process PATH so bundled ffmpeg is found.
 fn prepend_path(cmd: &mut Command, dir: &Path) {
     let existing = std::env::var_os("PATH").unwrap_or_default();
@@ -152,6 +166,39 @@ const YTDLP_RELEASE_BASE: &str =
 /// YouTube changes requirements; see
 /// https://github.com/yt-dlp/yt-dlp/wiki/Po-Token-Guide for current guidance.
 const YOUTUBE_EXTRACTOR_ARGS: &str = "youtube:player_client=default,tv";
+
+/// Browser profile passed to yt-dlp's `--impersonate` for Facebook. Facebook
+/// fingerprints the TLS/HTTP2 handshake and blocks yt-dlp's default client even
+/// when valid `--cookies` are supplied; impersonating a real Chrome makes the
+/// handshake indistinguishable from a browser. Requires yt-dlp to be built with
+/// curl_cffi (the standalone binaries bundle it; a pip install needs the
+/// `curl-cffi` extra). Bump this to a newer Chrome if a yt-dlp update drops the
+/// target (`yt-dlp --list-impersonate-targets` shows what the build supports).
+const FACEBOOK_IMPERSONATE_TARGET: &str = "chrome-110";
+
+/// Impersonation targets tried, in order, for Facebook URLs: the pinned target
+/// first, then a version-less `chrome` (yt-dlp picks whatever Chrome its build
+/// supports), then `None` (no impersonation at all). We only advance down this
+/// chain when yt-dlp rejects a target as unsupported (see
+/// [`looks_like_unsupported_impersonate`]), so a simple yt-dlp/curl_cffi version
+/// mismatch degrades gracefully instead of breaking the download outright. The
+/// final `None` means that, worst case, Facebook behaves exactly as it did
+/// before impersonation was added rather than failing hard.
+const FACEBOOK_IMPERSONATE_FALLBACKS: &[Option<&str>] =
+    &[Some(FACEBOOK_IMPERSONATE_TARGET), Some("chrome"), None];
+
+/// Single-element chain used for every non-Facebook URL: one attempt, never
+/// impersonated. Keeps the fallback-walking code uniform across both builders.
+const NO_IMPERSONATE: &[Option<&str>] = &[None];
+
+/// Whether a URL points at Facebook, so we can turn on TLS impersonation for it
+/// (see [`FACEBOOK_IMPERSONATE_TARGET`]). Kept narrow — only Facebook needs this;
+/// YouTube in particular must NOT be impersonated, as it relies on the client
+/// selection driven by [`YOUTUBE_EXTRACTOR_ARGS`] and impersonation breaks that.
+fn is_facebook_url(url: &str) -> bool {
+    let u = url.to_ascii_lowercase();
+    u.contains("facebook.com") || u.contains("fb.watch") || u.contains("fb.com")
+}
 const FFMPEG_WINDOWS_URL: &str = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
 const FFMPEG_MACOS_FFMPEG_URL: &str = "https://evermeet.cx/ffmpeg/getrelease/ffmpeg/zip";
 const FFMPEG_MACOS_FFPROBE_URL: &str = "https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip";
@@ -549,6 +596,57 @@ fn parse_percent(line: &str) -> Option<f64> {
     line[start..idx].parse::<f64>().ok()
 }
 
+/// Substrings (matched case-insensitively) in yt-dlp's stderr that indicate a
+/// fetch failed for a reason cookies might actually fix — a login-gated,
+/// age-restricted, or otherwise account-restricted video — as opposed to a
+/// genuinely invalid/unsupported URL or a transient network error, which no
+/// amount of cookies would help with. Deliberately site-agnostic (no
+/// "youtube"/"facebook" special-casing) so the same cookie-retry logic covers
+/// every extractor yt-dlp supports.
+const RESTRICTED_ACCESS_MARKERS: &[&str] = &[
+    "sign in",
+    "log in",
+    "login required",
+    "private",
+    "unavailable",
+    "restricted",
+    "members-only",
+    "member-only",
+    "confirm your age",
+    "age-restricted",
+    "requires payment",
+    "not available in your country",
+];
+
+/// Whether a failed yt-dlp run's stderr looks like it was blocked by an
+/// account/login restriction rather than a hard failure (bad URL, network
+/// error, etc.) — the signal used to decide whether retrying with cookies is
+/// even worth attempting.
+fn looks_restricted(stderr: &str) -> bool {
+    let lower = stderr.to_lowercase();
+    RESTRICTED_ACCESS_MARKERS.iter().any(|marker| lower.contains(marker))
+}
+
+/// Whether a failed yt-dlp run's stderr indicates the requested `--impersonate`
+/// target isn't usable by this build — either the target name is unknown, or the
+/// build lacks curl_cffi so no impersonation is available at all. This is the
+/// signal to retry with the next entry in [`FACEBOOK_IMPERSONATE_FALLBACKS`]
+/// rather than surfacing the error. Deliberately distinct from `looks_restricted`:
+/// that detects a server-side auth block (fixable with cookies), whereas this is
+/// a purely client-side capability mismatch (fixable only by changing/dropping
+/// the impersonation flag). Anchored on the "impersonat" stem so it can't
+/// false-positive on unrelated failures that merely mention "unsupported".
+fn looks_like_unsupported_impersonate(stderr: &str) -> bool {
+    let lower = stderr.to_lowercase();
+    lower.contains("impersonat")
+        && (lower.contains("unsupported")
+            || lower.contains("not available")
+            || lower.contains("not supported")
+            || lower.contains("no available")
+            || lower.contains("invalid")
+            || lower.contains("missing"))
+}
+
 /// Parse and validate a URL supplied by the frontend — a quick-access login
 /// link, a failed download's own URL, or whatever a user pastes into the
 /// custom-login box — before it's ever handed to the webview. yt-dlp supports
@@ -903,25 +1001,103 @@ async fn get_video_info(app: AppHandle, url: String) -> Value {
     let cookies = cookies_path(&app);
 
     let output = tauri::async_runtime::spawn_blocking(move || {
-        let mut cmd = configured_command(&bin);
-        // Deliberately no `--no-warnings`: yt-dlp's cookie loader reports skipped/
-        // rejected cookie file entries as warnings, and we want that visible in
-        // `stderr` below rather than silently swallowed.
-        cmd.args(["--no-playlist", "--no-download", "-j"]);
-        cmd.arg("--extractor-args").arg(YOUTUBE_EXTRACTOR_ARGS);
-        if cookies.exists() {
-            cmd.arg("--cookies").arg(&cookies);
+        let build = |use_cookies: bool, impersonate: Option<&str>| {
+            let mut cmd = configured_command(&bin);
+            // Force Python (yt-dlp) to emit UTF-8 rather than Windows' legacy
+            // `cp1252`, so extracting a title with emoji/Bengali text doesn't crash
+            // it in `TextIOWrapper` before it can print the JSON we parse below.
+            cmd.env("PYTHONIOENCODING", "utf-8");
+            // Deliberately no `--no-warnings`: yt-dlp's cookie loader reports skipped/
+            // rejected cookie file entries as warnings, and we want that visible in
+            // `stderr` below rather than silently swallowed.
+            cmd.args(["--no-playlist", "--no-download", "-j"]);
+            cmd.arg("--extractor-args").arg(YOUTUBE_EXTRACTOR_ARGS);
+            // Facebook blocks yt-dlp via TLS fingerprinting even with valid
+            // cookies; impersonate a real Chrome so the handshake passes. The
+            // caller decides the exact target (or `None`) so it can walk the
+            // fallback chain; for YouTube/others `impersonate` is always `None`.
+            if let Some(target) = impersonate {
+                cmd.arg("--impersonate").arg(target);
+            }
+            if use_cookies && cookies.exists() {
+                cmd.arg("--cookies").arg(&cookies);
+            }
+            if let Some(dir) = &ffdir {
+                // Point yt-dlp at our locally-downloaded ffmpeg here too, for parity
+                // with the download command. (Info extraction never merges, so this
+                // is a no-op in practice, but keeps both commands configured the same.)
+                let ffmpeg_exe = dir.join(binary_name("ffmpeg"));
+                cmd.arg("--ffmpeg-location").arg(&ffmpeg_exe);
+                prepend_path(&mut cmd, dir);
+            }
+            cmd.arg(&url);
+            cmd
+        };
+
+        // Facebook walks the impersonation fallback chain; every other site is a
+        // single, never-impersonated attempt.
+        let impersonate_chain: &[Option<&str>] = if is_facebook_url(&url) {
+            FACEBOOK_IMPERSONATE_FALLBACKS
+        } else {
+            NO_IMPERSONATE
+        };
+
+        // Runs one cookie decision, walking down the impersonation chain only
+        // while yt-dlp keeps rejecting the target as unsupported. Any other
+        // outcome (success, or a failure for some real reason) stops the walk and
+        // returns that result untouched.
+        let run_chain = |use_cookies: bool| {
+            // Build, log-on-failure, and run a single attempt. Logging the exact
+            // command + raw stderr here (rather than after the chain returns)
+            // means every exhausted attempt is visible in the `tauri dev`
+            // terminal, since the built `Command` is consumed by `.output()`.
+            let attempt = |target: Option<&str>| {
+                let mut cmd = build(use_cookies, target);
+                let desc = format_command(&cmd);
+                let out = cmd.output();
+                if let Ok(o) = &out {
+                    if !o.status.success() {
+                        eprintln!(
+                            "[video-downloader] get_video_info attempt failed (use_cookies={use_cookies}, impersonate={target:?})\n  command: {desc}\n  stderr:\n{}",
+                            String::from_utf8_lossy(&o.stderr)
+                        );
+                    }
+                }
+                out
+            };
+            let mut result = attempt(impersonate_chain[0]);
+            for next in impersonate_chain.iter().skip(1) {
+                let unsupported = match &result {
+                    Ok(out) if !out.status.success() => {
+                        looks_like_unsupported_impersonate(&String::from_utf8_lossy(&out.stderr))
+                    }
+                    _ => false,
+                };
+                if !unsupported {
+                    break;
+                }
+                result = attempt(*next);
+            }
+            result
+        };
+
+        // Cookie-less first: most videos need no auth at all, and sending an
+        // account's cookies on every single lookup — even to sites the user
+        // never intended to authenticate against — is exactly the exposure
+        // that risks those accounts getting flagged. Only if this fails *and*
+        // looks like an account restriction (not a bad URL, not a network
+        // blip) do we pay the cost of retrying with cookies attached.
+        let first = run_chain(false);
+        match &first {
+            Ok(out) if !out.status.success() && cookies.exists() => {
+                let stderr = String::from_utf8_lossy(&out.stderr);
+                if looks_restricted(&stderr) {
+                    return run_chain(true);
+                }
+            }
+            _ => {}
         }
-        if let Some(dir) = &ffdir {
-            // Point yt-dlp at our locally-downloaded ffmpeg here too, for parity
-            // with the download command. (Info extraction never merges, so this
-            // is a no-op in practice, but keeps both commands configured the same.)
-            let ffmpeg_exe = dir.join(binary_name("ffmpeg"));
-            cmd.arg("--ffmpeg-location").arg(&ffmpeg_exe);
-            prepend_path(&mut cmd, dir);
-        }
-        cmd.arg(&url);
-        cmd.output()
+        first
     })
     .await;
 
@@ -1232,93 +1408,21 @@ fn ensure_container(ffdir: &Option<PathBuf>, src: &Path, desired_ext: &str) -> R
     Ok(dst)
 }
 
-#[allow(clippy::too_many_arguments)]
-fn run_download(
-    app: AppHandle,
-    bin: PathBuf,
-    ffdir: Option<PathBuf>,
-    cookies: PathBuf,
-    url: String,
-    folder: String,
-    filename: String,
-    format: String,
-    quality: String,
-) -> Value {
-    let output_path = Path::new(&folder)
-        .join(format!("{filename}.%(ext)s"))
-        .to_string_lossy()
-        .to_string();
-    let is_audio_only = quality == "audio";
-    let format_string = build_format_string(&quality);
-
-    let mut cmd = configured_command(&bin);
-    cmd.arg("--format")
-        .arg(&format_string)
-        .arg("--output")
-        .arg(&output_path)
-        .args([
-            "--no-playlist",
-            "--progress",
-            "--newline",
-            "--embed-metadata",
-            "--no-post-overwrites",
-        ]);
-    cmd.arg("--extractor-args").arg(YOUTUBE_EXTRACTOR_ARGS);
-
-    if is_audio_only {
-        cmd.arg("--extract-audio")
-            .arg("--audio-format")
-            .arg(&format)
-            .args(["--audio-quality", "0"]);
-    } else {
-        // "any" means the user doesn't care which container they get — skip
-        // forcing one so yt-dlp just uses whatever the source naturally merges
-        // into (falling back to mkv itself if the streams are incompatible).
-        // For a concrete choice, still let yt-dlp attempt it directly (fast
-        // path when it just works) with mkv as yt-dlp's own fallback; whatever
-        // it actually produces is reconciled against the request afterwards by
-        // `ensure_container`, which is what guarantees the final file really is
-        // in the requested container even if this attempt falls back to mkv.
-        if format != "any" {
-            cmd.arg("--merge-output-format").arg(format!("{format}/mkv"));
-        }
-
-        // Cap quality by `res` (= min(height, width)), not raw height, so portrait
-        // sources (Facebook/Instagram Reels, YouTube Shorts) are capped by their
-        // true short edge instead of being clipped against their long edge and
-        // forced down to a much smaller rendition. `res:<N>` is a hard cap: yt-dlp
-        // never picks a format above it unless nothing smaller exists.
-        if let Some(cap) = resolution_cap(&quality) {
-            cmd.arg("--format-sort").arg(format!("res:{cap}"));
-        }
-
-        // Merging is a plain stream copy (no scale/pad filters are ever passed),
-        // so the source's resolution, orientation, and aspect ratio pass through
-        // to the container unchanged.
-    }
-
-    if cookies.exists() {
-        cmd.arg("--cookies").arg(&cookies);
-    }
-
-    if let Some(dir) = &ffdir {
-        let ffmpeg_exe = dir.join(binary_name("ffmpeg"));
-        cmd.arg("--ffmpeg-location").arg(&ffmpeg_exe);
-        prepend_path(&mut cmd, dir);
-    }
-
-    cmd.arg(&url);
-    cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
-
-    let mut child = match cmd.spawn() {
-        Ok(c) => c,
-        Err(_) => {
-            return json!({
-                "success": false,
-                "error": "Failed to run yt-dlp. Make sure it is installed."
-            })
-        }
-    };
+/// Spawn an already fully-configured yt-dlp `Command` (stdout/stderr must be
+/// piped), streaming its stdout as `download-progress` events and any stderr
+/// line containing "ERROR" as a `download-error` event, exactly as
+/// `run_download` always has. Factored out so the cookie-retry attempt in
+/// `run_download` can reuse the exact same streaming behavior instead of
+/// duplicating it. Returns `Err` only when the process couldn't be spawned at
+/// all (e.g. yt-dlp missing) — a condition retrying with different flags
+/// can't fix, so callers should stop rather than retry on that error.
+fn spawn_and_stream(
+    app: &AppHandle,
+    mut cmd: Command,
+) -> Result<(Option<std::process::ExitStatus>, String), String> {
+    let mut child = cmd
+        .spawn()
+        .map_err(|_| "Failed to run yt-dlp. Make sure it is installed.".to_string())?;
 
     let stdout = child.stdout.take().expect("stdout piped");
     let stderr = child.stderr.take().expect("stderr piped");
@@ -1354,6 +1458,208 @@ fn run_download(
 
     let status = child.wait().ok();
     let error_messages = err_handle.join().unwrap_or_default();
+    Ok((status, error_messages))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_download(
+    app: AppHandle,
+    bin: PathBuf,
+    ffdir: Option<PathBuf>,
+    cookies: PathBuf,
+    url: String,
+    folder: String,
+    filename: String,
+    format: String,
+    quality: String,
+) -> Value {
+    // Facebook titles are often the whole post caption — long enough to blow past
+    // Windows' path limits and trip yt-dlp's `Errno 22` (invalid argument) when it
+    // opens the output file. Cap the stem at 80 characters. `.chars().take(80)`
+    // counts whole Unicode scalar values, so it can never slice through the middle
+    // of a multi-byte UTF-8 sequence (emoji, Bengali, etc.) and produce an invalid
+    // name — matching how `sanitize_title` already caps length. This truncated
+    // `filename` shadows the argument so every downstream use (the `--output`
+    // template below and `find_downloaded_file`/the fallback path later) agrees on
+    // the exact stem yt-dlp will actually write.
+    let filename: String = filename.chars().take(80).collect();
+
+    let output_path = Path::new(&folder)
+        .join(format!("{filename}.%(ext)s"))
+        .to_string_lossy()
+        .to_string();
+    let is_audio_only = quality == "audio";
+    let format_string = build_format_string(&quality);
+
+    // Builds the full yt-dlp command for one attempt. `use_cookies` is the
+    // only thing that differs between the cookie-less first try and the
+    // cookie-attached retry below — everything else (format selection,
+    // container, resolution cap) must stay byte-for-byte identical so the
+    // retry is a true "same request, plus auth" rather than a different
+    // download.
+    let build_cmd = |use_cookies: bool, impersonate: Option<&str>| -> Command {
+        let mut cmd = configured_command(&bin);
+        // Force Python (yt-dlp) to emit UTF-8 on stdout/stderr. Without this it
+        // uses Windows' legacy `cp1252` console encoding and crashes in
+        // `TextIOWrapper` the moment it prints a title containing emoji or Bengali
+        // text — which is exactly what Facebook captions tend to contain.
+        cmd.env("PYTHONIOENCODING", "utf-8");
+        cmd.arg("--format")
+            .arg(&format_string)
+            .arg("--output")
+            .arg(&output_path)
+            .args([
+                "--no-playlist",
+                "--progress",
+                "--newline",
+                "--embed-metadata",
+                "--no-post-overwrites",
+                // Belt-and-braces filename safety on top of the 80-char stem cap
+                // above: force Windows-invalid characters out on every platform,
+                // and hard-limit the final filename length so a long localized
+                // extension/format suffix can't push it back over the OS limit.
+                "--windows-filenames",
+                "--trim-filenames",
+                "100",
+            ]);
+        cmd.arg("--extractor-args").arg(YOUTUBE_EXTRACTOR_ARGS);
+        // Facebook blocks yt-dlp via TLS fingerprinting even with valid cookies;
+        // impersonate a real Chrome so the handshake passes. The caller supplies
+        // the exact target (or `None`) so it can walk the fallback chain; for
+        // YouTube/others this is always `None`.
+        if let Some(target) = impersonate {
+            cmd.arg("--impersonate").arg(target);
+        }
+
+        if is_audio_only {
+            cmd.arg("--extract-audio")
+                .arg("--audio-format")
+                .arg(&format)
+                .args(["--audio-quality", "0"]);
+        } else {
+            // "any" means the user doesn't care which container they get — skip
+            // forcing one so yt-dlp just uses whatever the source naturally merges
+            // into (falling back to mkv itself if the streams are incompatible).
+            // For a concrete choice, still let yt-dlp attempt it directly (fast
+            // path when it just works) with mkv as yt-dlp's own fallback; whatever
+            // it actually produces is reconciled against the request afterwards by
+            // `ensure_container`, which is what guarantees the final file really is
+            // in the requested container even if this attempt falls back to mkv.
+            if format != "any" {
+                cmd.arg("--merge-output-format").arg(format!("{format}/mkv"));
+            }
+
+            // Cap quality by `res` (= min(height, width)), not raw height, so portrait
+            // sources (Facebook/Instagram Reels, YouTube Shorts) are capped by their
+            // true short edge instead of being clipped against their long edge and
+            // forced down to a much smaller rendition. `res:<N>` is a hard cap: yt-dlp
+            // never picks a format above it unless nothing smaller exists.
+            if let Some(cap) = resolution_cap(&quality) {
+                cmd.arg("--format-sort").arg(format!("res:{cap}"));
+            }
+
+            // Merging is a plain stream copy (no scale/pad filters are ever passed),
+            // so the source's resolution, orientation, and aspect ratio pass through
+            // to the container unchanged.
+        }
+
+        if use_cookies && cookies.exists() {
+            cmd.arg("--cookies").arg(&cookies);
+        }
+
+        if let Some(dir) = &ffdir {
+            let ffmpeg_exe = dir.join(binary_name("ffmpeg"));
+            cmd.arg("--ffmpeg-location").arg(&ffmpeg_exe);
+            prepend_path(&mut cmd, dir);
+        }
+
+        cmd.arg(&url);
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+        cmd
+    };
+
+    // Facebook walks the impersonation fallback chain; every other site is a
+    // single, never-impersonated attempt.
+    let impersonate_chain: &[Option<&str>] = if is_facebook_url(&url) {
+        FACEBOOK_IMPERSONATE_FALLBACKS
+    } else {
+        NO_IMPERSONATE
+    };
+
+    // Streams one cookie decision, walking down the impersonation chain only
+    // while yt-dlp keeps rejecting the target as unsupported. A spawn failure
+    // (Err) or any non-impersonation outcome stops the walk immediately.
+    let run_chain = |use_cookies: bool| -> Result<(Option<std::process::ExitStatus>, String), String> {
+        // Build, log-on-failure, and stream a single attempt. Logging the exact
+        // command + raw stderr here surfaces every failed attempt in the
+        // `tauri dev` terminal, even though `spawn_and_stream` normally only
+        // forwards `ERROR` lines to the frontend as events.
+        let attempt = |target: Option<&str>| {
+            let cmd = build_cmd(use_cookies, target);
+            let desc = format_command(&cmd);
+            let res = spawn_and_stream(&app, cmd);
+            match &res {
+                Ok((status, messages)) if status.map(|s| !s.success()).unwrap_or(true) => {
+                    eprintln!(
+                        "[video-downloader] run_download attempt failed (use_cookies={use_cookies}, impersonate={target:?})\n  command: {desc}\n  stderr:\n{messages}"
+                    );
+                }
+                Err(e) => {
+                    eprintln!(
+                        "[video-downloader] run_download could not spawn yt-dlp (use_cookies={use_cookies}, impersonate={target:?})\n  command: {desc}\n  error: {e}"
+                    );
+                }
+                _ => {}
+            }
+            res
+        };
+        let mut result = attempt(impersonate_chain[0]);
+        for next in impersonate_chain.iter().skip(1) {
+            let unsupported = match &result {
+                Ok((status, messages)) => {
+                    status.map(|s| !s.success()).unwrap_or(true)
+                        && looks_like_unsupported_impersonate(messages)
+                }
+                Err(_) => false,
+            };
+            if !unsupported {
+                break;
+            }
+            let _ = app.emit(
+                "download-retry",
+                "yt-dlp doesn't support that impersonation target — retrying with a fallback...",
+            );
+            result = attempt(*next);
+        }
+        result
+    };
+
+    // Cookie-less first: sending an account's cookies to every download,
+    // regardless of whether the target actually needs them, is exactly the
+    // exposure that risks that account getting flagged. Only retry with
+    // cookies attached if this attempt fails in a way that looks
+    // account-restricted (see `looks_restricted`) — a bad URL or a network
+    // blip gets reported as-is instead of silently escalating to cookies.
+    let first = run_chain(false);
+
+    let (status, error_messages) = match first {
+        Err(e) => return json!({ "success": false, "error": e }),
+        Ok((status, error_messages)) => {
+            let failed = status.map(|s| !s.success()).unwrap_or(true);
+            if failed && cookies.exists() && looks_restricted(&error_messages) {
+                let _ = app.emit(
+                    "download-retry",
+                    "First attempt looked login-gated — retrying with your saved cookies...",
+                );
+                match run_chain(true) {
+                    Err(e) => return json!({ "success": false, "error": e }),
+                    Ok(retried) => retried,
+                }
+            } else {
+                (status, error_messages)
+            }
+        }
+    };
 
     if status.and_then(|s| s.code()) == Some(0) {
         let downloaded = find_downloaded_file(Path::new(&folder), &filename);

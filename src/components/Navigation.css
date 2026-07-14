@@ -13,7 +13,7 @@
   box-shadow: var(--shadow-md);
   transition: transform 0.3s ease-in-out;
   z-index: 100;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--nav-border);
 }
 
 .navigation.hidden {

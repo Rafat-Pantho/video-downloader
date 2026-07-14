@@ -20,8 +20,12 @@
   --secondary-bg: rgba(79, 70, 229, 0.06);
   --secondary-hover: rgba(79, 70, 229, 0.12);
 
-  /* Sidebar surface — kept as its own token so it themes independently */
-  --nav-bg: rgba(255, 255, 255, 0.78);
+  /* Sidebar surface — kept as its own token so it themes independently.
+     Solid (not translucent) and a shade darker than the app background/cards:
+     at 0.78 alpha white it was blending into the app gradient behind it,
+     leaving no visible seam between the sidebar and the main content. */
+  --nav-bg: #f1f5f9;
+  --nav-border: rgba(100, 116, 139, 0.22);
 
   /* Text */
   --text-primary: #1e293b;
@@ -79,6 +83,9 @@
   --secondary-hover: rgba(129, 140, 248, 0.22);
 
   --nav-bg: rgba(30, 41, 59, 0.82);
+  /* Dark mode already had clear separation, so this matches the existing
+     --border value exactly — no visual change here. */
+  --nav-border: rgba(148, 163, 184, 0.16);
 
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
