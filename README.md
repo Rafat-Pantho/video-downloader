@@ -16,8 +16,8 @@ Version 2.0.0 is a full architectural rewrite: the app has migrated from **Elect
 
 ## Screenshots
 
-| Dark mode | Light mode |
-|---|---|
+| Dark mode                                     | Light mode                                      |
+| --------------------------------------------- | ----------------------------------------------- |
 | ![Dark mode screenshot](assets/dark_mode.png) | ![Light mode screenshot](assets/light_mode.png) |
 
 ## Installation
@@ -28,8 +28,8 @@ Download the installer for your platform:
 
 [![Windows](https://img.shields.io/badge/Windows-.exe-0078D6?logo=windows&logoColor=white)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/Video-Downloader_2.0.0_x64-setup.exe)
 [![macOS](https://img.shields.io/badge/macOS-.dmg-000000?logo=apple&logoColor=white)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/Video-Downloader_2.0.0_x64.dmg)
-[![Linux Debian/Ubuntu](https://img.shields.io/badge/Linux%20(Debian%2FUbuntu)-.deb-E95420?logo=debian&logoColor=white)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/video-downloader_2.0.0_amd64.deb)
-[![Linux Universal](https://img.shields.io/badge/Linux%20(Universal)-.AppImage-FCC624?logo=linux&logoColor=black)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/video-downloader_2.0.0_amd64.AppImage)
+[![Linux Debian/Ubuntu](<https://img.shields.io/badge/Linux%20(Debian%2FUbuntu)-.deb-E95420?logo=debian&logoColor=white>)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/video-downloader_2.0.0_amd64.deb)
+[![Linux Universal](<https://img.shields.io/badge/Linux%20(Universal)-.AppImage-FCC624?logo=linux&logoColor=black>)](https://github.com/Rafat-Pantho/video-downloader/releases/download/v2.0.0/video-downloader_2.0.0_amd64.AppImage)
 
 > Swap `<YOUR_GITHUB_USERNAME>` and `<YOUR_REPO_NAME>` for your actual GitHub username and repository name. Filenames follow Tauri's default bundle naming — verify them against the actual asset names on the [v2.0.0 release](https://github.com/Rafat-Pantho/video-downloader/releases/tag/v2.0.0) once the GitHub Actions build finishes, and update the links if they differ (e.g. `arm64` builds on Apple Silicon).
 
